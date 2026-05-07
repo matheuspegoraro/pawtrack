@@ -61,6 +61,7 @@ export default function AddRecordScreen() {
   const [vetName, setVetName] = useState('');
   const [notes, setNotes] = useState('');
   const [dosage, setDosage] = useState('');
+  const [repeatInterval, setRepeatInterval] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
@@ -125,6 +126,7 @@ export default function AddRecordScreen() {
             health_record_id: record.id,
             title: reminderTitle,
             remind_at: remindAt.toISOString(),
+            repeat_interval: repeatInterval || null,
             is_active: true,
           });
 
@@ -298,6 +300,39 @@ export default function AddRecordScreen() {
               />
             </View>
           </View>
+
+          {nextDueDate.length > 0 && (
+            <>
+              <Text style={styles.label}>Repeat</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: Spacing.sm }}>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {[
+                    { value: '', label: 'None' },
+                    { value: '1 month', label: 'Monthly' },
+                    { value: '3 months', label: 'Every 3mo' },
+                    { value: '6 months', label: 'Every 6mo' },
+                    { value: '1 year', label: 'Yearly' },
+                  ].map((opt) => (
+                    <Pressable
+                      key={opt.value}
+                      style={[
+                        styles.repeatChip,
+                        repeatInterval === opt.value && styles.repeatChipActive,
+                      ]}
+                      onPress={() => setRepeatInterval(opt.value)}
+                    >
+                      <Text style={[
+                        styles.repeatChipText,
+                        repeatInterval === opt.value && styles.repeatChipTextActive,
+                      ]}>
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          )}
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(400).delay(400)}>
@@ -537,6 +572,26 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.warmWhite,
   },
   uploadText: { fontSize: 14, fontWeight: '600', color: Colors.textTertiary },
+  repeatChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.warmWhite,
+    borderWidth: 2,
+    borderColor: Colors.border,
+  },
+  repeatChipActive: {
+    borderColor: Colors.terracotta,
+    backgroundColor: Colors.terracottaLight,
+  },
+  repeatChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+  },
+  repeatChipTextActive: {
+    color: Colors.terracotta,
+  },
   footer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,

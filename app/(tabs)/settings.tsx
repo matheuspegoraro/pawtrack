@@ -26,6 +26,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { useAuthStore } from '@/stores/auth';
 import { usePremiumStore } from '@/stores/premium';
+import { registerForPushNotifications, unregisterPushNotifications } from '@/lib/notifications';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -34,6 +35,15 @@ export default function SettingsScreen() {
   const isPremium = usePremiumStore((s) => s.isPremium);
 
   const [pushNotifications, setPushNotifications] = useState(true);
+
+  const handleTogglePush = async (value: boolean) => {
+    setPushNotifications(value);
+    if (value) {
+      await registerForPushNotifications();
+    } else {
+      await unregisterPushNotifications();
+    }
+  };
 
   const isAnonymous = !user?.email;
   const userName =
@@ -123,7 +133,7 @@ export default function SettingsScreen() {
               <Text style={[styles.menuLabel, { flex: 1 }]}>Push Notifications</Text>
               <Switch
                 value={pushNotifications}
-                onValueChange={setPushNotifications}
+                onValueChange={handleTogglePush}
                 trackColor={{
                   false: Colors.border,
                   true: Colors.terracottaLight,
