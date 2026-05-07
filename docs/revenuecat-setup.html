@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PawTrack — RevenueCat & App Store Setup Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;600;700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --terra: #B5633B;
+      --terra-light: #F5E6DB;
+      --terra-dark: #8C4A2B;
+      --sand: #F5F0EB;
+      --cream: #FEFBF8;
+      --text: #2A2017;
+      --text2: #6B5D52;
+      --text3: #9E9189;
+      --border: #E8E0D8;
+      --sage: #5A9E6F;
+      --sage-light: #E2F0E6;
+      --amber: #C4882A;
+      --amber-light: #FBF0DB;
+      --plum: #8B5A9E;
+      --plum-light: #F0E5F5;
+      --coral: #D94F3D;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Figtree', sans-serif;
+      background: var(--sand);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 0 0 80px;
+    }
+
+    /* Hero */
+    .hero {
+      background: var(--terra);
+      padding: 60px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: var(--sand);
+      border-radius: 28px 28px 0 0;
+    }
+
+    .hero h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Container */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Phase */
+    .phase {
+      margin-top: 40px;
+    }
+
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .phase-number {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: white;
+      background: var(--terra);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .phase-title {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .phase-desc {
+      color: var(--text2);
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+
+    /* Step */
+    .step {
+      background: var(--cream);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .step-num {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--terra);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .step h3 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .step p, .step li {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    .step ul, .step ol {
+      padding-left: 20px;
+      margin-top: 8px;
+    }
+
+    .step li { margin-bottom: 4px; }
+
+    .step a {
+      color: var(--terra);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .step a:hover { text-decoration: underline; }
+
+    /* URL box */
+    .url-box {
+      background: var(--sand);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: var(--terra-dark);
+      margin: 10px 0;
+      word-break: break-all;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .url-box:hover::after {
+      content: 'Click to copy';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Figtree', sans-serif;
+      font-size: 11px;
+      color: var(--text3);
+    }
+
+    /* Prompt box */
+    .prompt-box {
+      background: var(--text);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      position: relative;
+    }
+
+    .prompt-label {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--terra-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .prompt-text {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #E8E0D8;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Figtree', sans-serif;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    /* Info box */
+    .info-box {
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 12px 0;
+      font-size: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .info-box.warning {
+      background: var(--amber-light);
+      color: var(--amber);
+    }
+
+    .info-box.success {
+      background: var(--sage-light);
+      color: var(--sage);
+    }
+
+    .info-box.note {
+      background: var(--plum-light);
+      color: var(--plum);
+    }
+
+    .info-box .icon { font-size: 18px; flex-shrink: 0; }
+
+    /* Table */
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+
+    .config-table th {
+      text-align: left;
+      font-family: 'Gabarito', sans-serif;
+      font-weight: 700;
+      color: var(--text);
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--terra-light);
+    }
+
+    .config-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+    }
+
+    .config-table td:first-child {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .config-table code {
+      background: var(--sand);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--terra-dark);
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0;
+    }
+
+    .checklist li {
+      padding: 8px 0;
+      padding-left: 28px;
+      position: relative;
+      font-size: 14px;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checklist li::before {
+      content: '○';
+      position: absolute;
+      left: 0;
+      color: var(--terra);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Separator */
+    .separator {
+      height: 2px;
+      background: var(--border);
+      margin: 48px 0 0;
+      border-radius: 1px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 20px 0;
+      color: var(--text3);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>PawTrack Setup Guide</h1>
+  <p>Complete guide to configure RevenueCat, Apple App Store Connect, and Google Play for in-app subscriptions</p>
+</div>
+
+<div class="container">
+
+  <!-- ============================== -->
+  <!-- PHASE 1: Apple Developer       -->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">1</div>
+      <div class="phase-title">Apple Developer Account</div>
+    </div>
+    <p class="phase-desc">You need an Apple Developer account ($99/year) to publish on the App Store and configure in-app purchases.</p>
+
+    <div class="step">
+      <div class="step-num">Step 1.1</div>
+      <h3>Enroll in Apple Developer Program</h3>
+      <p>If you don't have one yet, enroll at:</p>
+      <div class="url-box" onclick="navigator.clipboard.writeText('https://developer.apple.com/programs/enroll/')">
+        https://developer.apple.com/programs/enroll/
+      </div>
+      <div class="info-box warning">
+        <span class="icon">⚠️</span>
+        <span>Approval can take 24-48 hours. You need this before configuring subscriptions.</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 1.2</div>
+      <h3>Create App ID in App Store Connect</h3>
+      <div class="url-box" onclick="navigator.clipboard.writeText('https://appstoreconnect.apple.com/apps')">
+        https://appstoreconnect.apple.com/apps
+      </div>
+      <ol>
+        <li>Click <strong>"+"</strong> → <strong>"New App"</strong></li>
+        <li>Platform: <strong>iOS</strong></li>
+        <li>Name: <strong>PawTrack</strong></li>
+        <li>Primary Language: <strong>English (U.S.)</strong></li>
+        <li>Bundle ID: <strong>com.matheuspegoraro.pawtrack</strong></li>
+        <li>SKU: <strong>pawtrack-ios</strong></li>
+        <li>Click <strong>Create</strong></li>
+      </ol>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt for AI — App Store Description</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Write an App Store description for "PawTrack" — a mobile app that helps pet owners track their pet's health records (vaccines, medications, vet visits, weight) and get smart reminders for upcoming health events.
+
+Target audience: US pet parents, 25-45 years old, who treat their pets like family.
+
+Requirements:
+- Short description (max 30 characters): for the subtitle field
+- Full description (max 4000 characters): engaging, benefit-focused, with clear feature list
+- Keywords (max 100 characters, comma-separated): for ASO optimization
+- Promotional text (max 170 characters): for the promotional text field
+- 3 key phrases for screenshots captions
+
+Tone: warm, trustworthy, caring — not clinical or childish.
+Mention: vaccines, medications, vet visits, reminders, PDF export, family sharing.
+Price model: Free with premium subscription ($5.99/mo or $49.99/yr).</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 1.3</div>
+      <h3>Generate In-App Purchase Key (P8)</h3>
+      <div class="url-box" onclick="navigator.clipboard.writeText('https://appstoreconnect.apple.com/access/integrations/api/subs')">
+        https://appstoreconnect.apple.com/access/integrations/api/subs
+      </div>
+      <ol>
+        <li>Go to <strong>Users and Access</strong> → <strong>Integrations</strong> → <strong>In-App Purchase</strong></li>
+        <li>Click <strong>"Generate In-App Purchase Key"</strong></li>
+        <li>Name: <strong>PawTrack RevenueCat</strong></li>
+        <li>Click <strong>Generate</strong></li>
+        <li><strong>Download the .p8 file</strong> — you can only download it ONCE</li>
+        <li>Note the <strong>Key ID</strong> and your <strong>Issuer ID</strong> (shown at the top)</li>
+      </ol>
+      <div class="info-box warning">
+        <span class="icon">⚠️</span>
+        <span>Save the .p8 file safely. Apple only lets you download it once. You'll upload it to RevenueCat.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ============================== -->
+  <!-- PHASE 2: Subscriptions         -->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">2</div>
+      <div class="phase-title">Create Subscriptions in App Store Connect</div>
+    </div>
+    <p class="phase-desc">Configure the actual subscription products that users will purchase.</p>
+
+    <div class="step">
+      <div class="step-num">Step 2.1</div>
+      <h3>Create Subscription Group</h3>
+      <p>In your app on App Store Connect:</p>
+      <ol>
+        <li>Go to your app → <strong>Subscriptions</strong> (left sidebar)</li>
+        <li>Click <strong>"+"</strong> next to "Subscription Groups"</li>
+        <li>Group name: <strong>PawTrack Pro</strong></li>
+        <li>Click <strong>Create</strong></li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 2.2</div>
+      <h3>Create Monthly Subscription</h3>
+      <p>Inside the "PawTrack Pro" group:</p>
+      <ol>
+        <li>Click <strong>"+"</strong> next to the group name</li>
+        <li>Reference Name: <strong>PawTrack Pro Monthly</strong></li>
+        <li>Product ID: <strong>pawtrack_pro_monthly</strong></li>
+        <li>Click <strong>Create</strong></li>
+      </ol>
+      <p>Then configure:</p>
+      <table class="config-table">
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Subscription Duration</td><td><code>1 Month</code></td></tr>
+        <tr><td>Price</td><td><code>$5.99</code></td></tr>
+        <tr><td>Free Trial</td><td><code>7 Days</code> (Introductory Offer → Free → 7 days)</td></tr>
+        <tr><td>Display Name</td><td><code>PawTrack Pro</code></td></tr>
+        <tr><td>Description</td><td><code>Unlimited pets, smart reminders, PDF export, family sharing</code></td></tr>
+      </table>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 2.3</div>
+      <h3>Create Annual Subscription</h3>
+      <p>Same group, add another product:</p>
+      <table class="config-table">
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Reference Name</td><td><code>PawTrack Pro Annual</code></td></tr>
+        <tr><td>Product ID</td><td><code>pawtrack_pro_annual</code></td></tr>
+        <tr><td>Subscription Duration</td><td><code>1 Year</code></td></tr>
+        <tr><td>Price</td><td><code>$49.99</code></td></tr>
+        <tr><td>Free Trial</td><td><code>7 Days</code></td></tr>
+        <tr><td>Display Name</td><td><code>PawTrack Pro</code></td></tr>
+        <tr><td>Description</td><td><code>Unlimited pets, smart reminders, PDF export, family sharing — save 30%</code></td></tr>
+      </table>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 2.4</div>
+      <h3>App Store Review Screenshot</h3>
+      <p>Each subscription needs a review screenshot. Use this prompt to generate one:</p>
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt for AI — Subscription Screenshot</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Create a clean iPhone screenshot mockup (1290x2796px) for an app subscription page review.
+
+The screenshot should show a mobile subscription paywall for "PawTrack Pro" with:
+- A terracotta (#B5633B) header with a crown icon
+- Title: "Unlock PawTrack Pro"
+- 4 features listed: Export Reports, Smart Reminders, Health Trends, Family Sharing
+- Two plan options: Monthly $5.99/mo and Annual $49.99/yr (highlighted with "SAVE 30%")
+- A "Start 7-Day Free Trial" button in terracotta
+- Background: warm cream (#FEFBF8)
+- Style: clean, minimal, modern mobile app
+
+This is for Apple App Store review purposes.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ============================== -->
+  <!-- PHASE 3: RevenueCat Config     -->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">3</div>
+      <div class="phase-title">Configure RevenueCat</div>
+    </div>
+    <p class="phase-desc">Connect RevenueCat to your App Store products.</p>
+
+    <div class="step">
+      <div class="step-num">Step 3.1</div>
+      <h3>Upload the P8 Key</h3>
+      <div class="url-box" onclick="navigator.clipboard.writeText('https://app.revenuecat.com')">
+        https://app.revenuecat.com
+      </div>
+      <ol>
+        <li>Go to your PawTrack project → <strong>Apps</strong> → your Apple app</li>
+        <li>Under <strong>"In-App Purchase Key Configuration"</strong>:</li>
+        <li>Upload the <strong>.p8 file</strong> from Step 1.3</li>
+        <li>Enter the <strong>Key ID</strong></li>
+        <li>Enter the <strong>Issuer ID</strong></li>
+        <li>Enter your <strong>App Bundle ID</strong>: <code>com.matheuspegoraro.pawtrack</code></li>
+        <li>Click <strong>Save</strong></li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 3.2</div>
+      <h3>Create Products in RevenueCat</h3>
+      <ol>
+        <li>Go to <strong>Products</strong> (left sidebar)</li>
+        <li>Click <strong>"+ New"</strong></li>
+        <li>Add product:
+          <ul>
+            <li>Identifier: <code>pawtrack_pro_monthly</code></li>
+            <li>App: your Apple app</li>
+          </ul>
+        </li>
+        <li>Add another product:
+          <ul>
+            <li>Identifier: <code>pawtrack_pro_annual</code></li>
+            <li>App: your Apple app</li>
+          </ul>
+        </li>
+      </ol>
+      <div class="info-box note">
+        <span class="icon">💡</span>
+        <span>The product identifiers must match exactly what you created in App Store Connect (Step 2.2 and 2.3).</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 3.3</div>
+      <h3>Create Entitlement</h3>
+      <ol>
+        <li>Go to <strong>Entitlements</strong> (left sidebar)</li>
+        <li>Click <strong>"+ New"</strong></li>
+        <li>Identifier: <code>pro</code></li>
+        <li>Description: <code>PawTrack Pro access</code></li>
+        <li>Click <strong>Create</strong></li>
+        <li><strong>Attach both products</strong> to this entitlement:
+          <ul>
+            <li><code>pawtrack_pro_monthly</code></li>
+            <li><code>pawtrack_pro_annual</code></li>
+          </ul>
+        </li>
+      </ol>
+      <div class="info-box success">
+        <span class="icon">✅</span>
+        <span>The app code checks for the entitlement <code>pro</code> — this must match exactly.</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 3.4</div>
+      <h3>Create Offering</h3>
+      <ol>
+        <li>Go to <strong>Offerings</strong> (left sidebar)</li>
+        <li>Click <strong>"+ New"</strong></li>
+        <li>Identifier: <code>default</code></li>
+        <li>Description: <code>Default offering</code></li>
+        <li>Click <strong>Create</strong></li>
+        <li>Add two packages inside this offering:
+          <ul>
+            <li>Package: <strong>$rc_monthly</strong> → Product: <code>pawtrack_pro_monthly</code></li>
+            <li>Package: <strong>$rc_annual</strong> → Product: <code>pawtrack_pro_annual</code></li>
+          </ul>
+        </li>
+        <li>Make sure this offering is set as <strong>"Current"</strong></li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 3.5</div>
+      <h3>Enable App Store Server Notifications</h3>
+      <ol>
+        <li>In RevenueCat, go to your Apple app settings</li>
+        <li>Copy the <strong>Apple Server Notification URL</strong> that RevenueCat provides</li>
+        <li>Go to App Store Connect → your app → <strong>App Information</strong></li>
+        <li>Scroll to <strong>"App Store Server Notifications"</strong></li>
+        <li>For <strong>Production URL</strong>, paste the RevenueCat URL</li>
+        <li>For <strong>Sandbox URL</strong>, paste the same RevenueCat URL</li>
+        <li>Version: <strong>Version 2</strong></li>
+        <li>Click <strong>Save</strong></li>
+      </ol>
+      <div class="info-box note">
+        <span class="icon">💡</span>
+        <span>This allows Apple to notify RevenueCat of subscription changes (renewals, cancellations, refunds) in real-time.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ============================== -->
+  <!-- PHASE 4: Testing               -->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">4</div>
+      <div class="phase-title">Testing Subscriptions</div>
+    </div>
+    <p class="phase-desc">Test the purchase flow before submitting to the App Store.</p>
+
+    <div class="step">
+      <div class="step-num">Step 4.1</div>
+      <h3>Create Sandbox Tester</h3>
+      <div class="url-box" onclick="navigator.clipboard.writeText('https://appstoreconnect.apple.com/access/testers/sandbox')">
+        https://appstoreconnect.apple.com/access/testers/sandbox
+      </div>
+      <ol>
+        <li>Click <strong>"+"</strong> to add a new sandbox tester</li>
+        <li>Use a <strong>real email address</strong> you have access to (not your main Apple ID)</li>
+        <li>Fill in name, password, region: <strong>United States</strong></li>
+        <li>Click <strong>Create</strong></li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 4.2</div>
+      <h3>Test on Device</h3>
+      <ol>
+        <li>On your iPhone: <strong>Settings → App Store → Sandbox Account</strong></li>
+        <li>Sign in with the sandbox tester email</li>
+        <li>Build and run the app on your device</li>
+        <li>Go to the Premium screen and try purchasing</li>
+        <li>Sandbox purchases are <strong>free</strong> and auto-renew every few minutes</li>
+      </ol>
+      <div class="info-box success">
+        <span class="icon">✅</span>
+        <span>In sandbox, subscriptions renew at accelerated rates: monthly = every 5 minutes, annual = every hour.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ============================== -->
+  <!-- PHASE 5: App Store Submission  -->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">5</div>
+      <div class="phase-title">App Store Submission</div>
+    </div>
+    <p class="phase-desc">Prepare and submit the app for review.</p>
+
+    <div class="step">
+      <div class="step-num">Step 5.1</div>
+      <h3>Generate App Screenshots</h3>
+      <p>You need screenshots for 6.7" (iPhone 15 Pro Max) and 6.1" (iPhone 15 Pro) at minimum.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt for AI — App Store Screenshots</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Create a set of 5 App Store screenshots for "PawTrack" — a pet health tracking app.
+
+Size: 1290 x 2796 pixels (iPhone 6.7")
+Style: clean mockup with iPhone frame, warm cream (#FEFBF8) background
+
+Screenshots needed:
+1. Home screen showing pet cards, today's tasks, and upcoming events
+   Caption: "All your pet's health in one place"
+
+2. Pet profile with health timeline showing vaccines, medications, vet visits
+   Caption: "Complete health history at a glance"
+
+3. Add record screen showing vaccine/medication entry form
+   Caption: "Track vaccines, meds, and visits"
+
+4. Reminders screen showing upcoming alerts with colored badges
+   Caption: "Never miss an important date"
+
+5. Premium paywall showing features and subscription plans
+   Caption: "Unlock the full experience"
+
+Design: terracotta (#B5633B) as primary accent color, warm sand (#F5F0EB) backgrounds, rounded corners, modern iOS design. Use the PawTrack logo (paw print with heartbeat line) where appropriate.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 5.2</div>
+      <h3>Privacy Policy & Terms</h3>
+      <p>Apple requires a privacy policy URL and terms of use for apps with subscriptions.</p>
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt for AI — Privacy Policy</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Write a privacy policy for "PawTrack" — a mobile app that tracks pet health records.
+
+Details:
+- Company: individual developer (Matheus Pegoraro)
+- Data collected: email, name, pet information (name, breed, weight, health records), device push notification tokens
+- Data storage: Supabase (cloud database hosted on AWS in South America)
+- Authentication: email/password and anonymous accounts via Supabase Auth
+- Third-party services: RevenueCat (subscription management), Expo (push notifications)
+- No data is sold to third parties
+- Users can delete their account and all data
+- COPPA: not directed at children under 13
+- Contact email: [your email]
+
+Format: clean HTML page with sections, suitable for hosting as a static page.
+Include: effective date, data collection, data usage, data storage, third parties, user rights, contact info.</div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label">Prompt for AI — Terms of Service</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Write terms of service for "PawTrack" — a mobile app for tracking pet health records with a premium subscription.
+
+Details:
+- App name: PawTrack
+- Developer: Matheus Pegoraro (individual)
+- Subscription: PawTrack Pro ($5.99/month or $49.99/year) with 7-day free trial
+- Payment: processed by Apple App Store
+- Cancellation: through Apple subscription settings
+- Auto-renewal: subscriptions auto-renew unless cancelled 24h before period end
+- The app is not a substitute for professional veterinary advice
+- User-generated content: pet health records (private, not shared publicly)
+
+Format: clean HTML page with numbered sections.
+Include: acceptance of terms, subscription terms, cancellation policy, disclaimers, limitation of liability, governing law (Brazil).</div>
+      </div>
+      <div class="info-box warning">
+        <span class="icon">⚠️</span>
+        <span>Host these pages somewhere public (GitHub Pages, Vercel, or a simple landing page) and add the URLs to App Store Connect.</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 5.3</div>
+      <h3>Build for Submission</h3>
+      <p>Build the app archive and upload to App Store Connect:</p>
+      <div class="prompt-box">
+        <div class="prompt-label">Terminal Commands</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text"># Install EAS CLI (if not installed)
+npm install -g eas-cli
+
+# Login to Expo
+eas login
+
+# Configure EAS Build
+eas build:configure
+
+# Build for iOS App Store submission
+eas build --platform ios --profile production
+
+# Submit to App Store Connect
+eas submit --platform ios</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">Step 5.4</div>
+      <h3>App Review Information</h3>
+      <p>When filling the App Store review form, use these details:</p>
+      <table class="config-table">
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Category</td><td><code>Health & Fitness</code> (or Lifestyle)</td></tr>
+        <tr><td>Age Rating</td><td><code>4+</code></td></tr>
+        <tr><td>Price</td><td><code>Free</code> (with in-app purchases)</td></tr>
+        <tr><td>Review Notes</td><td>See prompt below</td></tr>
+      </table>
+      <div class="prompt-box">
+        <div class="prompt-label">App Review Notes</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">PawTrack is a pet health tracking app that allows users to record vaccines, medications, vet visits, and weight for their pets. The app sends reminders for upcoming health events.
+
+The app offers a free tier (1 pet, basic records) and a premium subscription "PawTrack Pro" ($5.99/month or $49.99/year with 7-day free trial) that unlocks unlimited pets, PDF export, smart recurring reminders, and family sharing.
+
+To test the app:
+1. Open the app — it auto-creates an anonymous account
+2. Tap "Add Your Pet" to create a pet profile
+3. Add health records via the paw button in the tab bar
+4. View reminders in the Alerts tab
+5. Access subscription from Settings → PawTrack Pro
+
+No login is required to use the app. Account creation is optional for data backup.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ============================== -->
+  <!-- PHASE 6: Google Play (optional)-->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">6</div>
+      <div class="phase-title">Google Play Store (Optional)</div>
+    </div>
+    <p class="phase-desc">If you want to publish on Android too.</p>
+
+    <div class="step">
+      <div class="step-num">Step 6.1</div>
+      <h3>Google Play Console Setup</h3>
+      <div class="url-box" onclick="navigator.clipboard.writeText('https://play.google.com/console')">
+        https://play.google.com/console
+      </div>
+      <ol>
+        <li>Create a developer account ($25 one-time fee)</li>
+        <li>Create a new app → Name: <strong>PawTrack</strong></li>
+        <li>Go to <strong>Monetize → Products → Subscriptions</strong></li>
+        <li>Create subscription:
+          <ul>
+            <li>Product ID: <code>pawtrack_pro_monthly</code> — $5.99/month</li>
+            <li>Product ID: <code>pawtrack_pro_annual</code> — $49.99/year</li>
+          </ul>
+        </li>
+        <li>In RevenueCat: add a Google Play app with your <strong>package name</strong> and upload the <strong>Google Play Service Credentials JSON</strong></li>
+      </ol>
+      <div class="info-box note">
+        <span class="icon">💡</span>
+        <span>For Google Play credentials, follow: <a href="https://www.revenuecat.com/docs/creating-play-service-credentials" target="_blank">RevenueCat Google Play Setup Guide</a></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="separator"></div>
+
+  <!-- ============================== -->
+  <!-- CHECKLIST                      -->
+  <!-- ============================== -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-number">✓</div>
+      <div class="phase-title">Final Checklist</div>
+    </div>
+
+    <div class="step">
+      <h3>Before Submitting</h3>
+      <ul class="checklist">
+        <li>Apple Developer account active and enrolled</li>
+        <li>App created in App Store Connect with Bundle ID <code>com.matheuspegoraro.pawtrack</code></li>
+        <li>P8 In-App Purchase Key generated and downloaded</li>
+        <li>Monthly subscription created: <code>pawtrack_pro_monthly</code> — $5.99</li>
+        <li>Annual subscription created: <code>pawtrack_pro_annual</code> — $49.99</li>
+        <li>Both subscriptions have 7-day free trial configured</li>
+        <li>RevenueCat: P8 key uploaded</li>
+        <li>RevenueCat: Both products created and linked</li>
+        <li>RevenueCat: Entitlement <code>pro</code> created with both products</li>
+        <li>RevenueCat: Offering <code>default</code> with $rc_monthly and $rc_annual packages</li>
+        <li>App Store Server Notifications URL configured (v2)</li>
+        <li>Sandbox tester created and tested on device</li>
+        <li>Privacy Policy hosted and URL added to App Store Connect</li>
+        <li>Terms of Service hosted and URL added</li>
+        <li>App screenshots uploaded (6.7" and 6.1")</li>
+        <li>App description, keywords, and promotional text filled</li>
+        <li>Review notes added explaining subscription and test flow</li>
+        <li>App built and uploaded via EAS Build</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>PawTrack Setup Guide — Generated for Matheus Pegoraro</p>
+  </div>
+
+</div>
+
+<script>
+function copyPrompt(btn) {
+  const text = btn.parentElement.querySelector('.prompt-text').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+document.querySelectorAll('.url-box').forEach(box => {
+  box.addEventListener('click', () => {
+    navigator.clipboard.writeText(box.textContent.trim());
+    const original = box.textContent;
+    box.style.borderColor = '#5A9E6F';
+    setTimeout(() => box.style.borderColor = '', 1500);
+  });
+});
+</script>
+
+</body>
+</html>
