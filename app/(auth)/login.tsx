@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { PawPrint, Mail, Lock } from 'lucide-react-native';
+import { PawPrint, Mail, Lock, ArrowLeft } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 
@@ -47,6 +47,10 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <ArrowLeft size={22} color={Colors.textPrimary} />
+          </TouchableOpacity>
+
           <View style={styles.header}>
             <View style={styles.iconCircle}>
               <PawPrint size={48} color={Colors.terracotta} strokeWidth={2} />
@@ -111,6 +115,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.warmWhite,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.sand,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: Spacing.lg,
+    marginTop: Spacing.sm,
   },
   flex: {
     flex: 1,

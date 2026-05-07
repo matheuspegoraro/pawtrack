@@ -74,7 +74,10 @@ export default function SettingsScreen() {
       >
         {/* User Info Card */}
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
-          <View style={styles.userCard}>
+          <Pressable
+            style={styles.userCard}
+            onPress={isAnonymous ? () => router.push('/(auth)/login') : undefined}
+          >
             <View style={styles.userAvatarWrapper}>
               <View style={styles.userAvatar}>
                 <Text style={styles.userAvatarText}>
@@ -90,16 +93,17 @@ export default function SettingsScreen() {
                 {isAnonymous ? 'Anonymous User' : userName}
               </Text>
               {isAnonymous ? (
-                <Pressable onPress={() => router.push('/(auth)/signup')}>
-                  <Text style={styles.userPrompt}>
-                    Create an account for backup
-                  </Text>
-                </Pressable>
+                <Text style={styles.userPrompt}>
+                  Tap to create an account
+                </Text>
               ) : (
                 <Text style={styles.userEmail}>{userEmail}</Text>
               )}
             </View>
-          </View>
+            {isAnonymous && (
+              <ChevronRight size={18} color={Colors.textTertiary} />
+            )}
+          </Pressable>
         </Animated.View>
 
         {/* Account Section */}
