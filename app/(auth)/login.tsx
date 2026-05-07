@@ -10,14 +10,17 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { PawPrint, Mail, Lock, ArrowLeft } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { PawPrint, Mail, Lock, ChevronLeft } from 'lucide-react-native';
 import { useAuthStore } from '@/stores/auth';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ from?: string }>();
+  const fromSettings = params.from === 'settings';
   const { signIn, loading } = useAuthStore();
 
   const [email, setEmail] = useState('');
@@ -31,27 +34,38 @@ export default function LoginScreen() {
 
     try {
       await signIn(email.trim(), password);
+      if (fromSettings) router.back();
     } catch (error: any) {
       Alert.alert('Sign in failed', error.message ?? 'An unexpected error occurred.');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.root}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
+        {/* Header — only when coming from settings */}
+        {fromSettings && (
+          <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+              <ChevronLeft size={22} color={Colors.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Sign In</Text>
+            <View style={{ width: 36 }} />
+          </View>
+        )}
+
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            !fromSettings && { paddingTop: insets.top + Spacing.xl },
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <ArrowLeft size={22} color={Colors.textPrimary} />
-          </TouchableOpacity>
-
-          <View style={styles.header}>
+          <View style={styles.hero}>
             <View style={styles.iconCircle}>
               <PawPrint size={48} color={Colors.terracotta} strokeWidth={2} />
             </View>
@@ -101,42 +115,64 @@ export default function LoginScreen() {
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account?</Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
+            <TouchableOpacity onPress={() => router.push('/(auth)/signup?from=' + (params.from ?? ''))}>
               <Text style={styles.footerLink}> Create one</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: Colors.warmWhite,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
     backgroundColor: Colors.sand,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: Spacing.lg,
-    marginTop: Spacing.sm,
   },
   flex: {
     flex: 1,
   },
+
+  /* Header — matches app pattern */
+  header: {
+    backgroundColor: Colors.warmWhite,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 6,
+    zIndex: 10,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.sand,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: Spacing.lg,
     justifyContent: 'center',
   },
-  header: {
+  hero: {
     alignItems: 'center',
-    marginBottom: Spacing['2xl'],
+    marginBottom: 40,
   },
   iconCircle: {
     width: 100,
@@ -146,6 +182,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
   },
   title: {
     fontSize: 28,
@@ -154,11 +195,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '400',
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+    maxWidth: 280,
   },
   form: {
     gap: Spacing.md,
@@ -167,12 +209,17 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     height: 56,
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   inputIcon: {
     marginRight: Spacing.sm,
@@ -191,6 +238,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: Spacing.sm,
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -198,7 +250,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: Colors.white,
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',

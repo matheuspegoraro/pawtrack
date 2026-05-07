@@ -76,7 +76,7 @@ export default function SettingsScreen() {
         <Animated.View entering={FadeInDown.duration(500).delay(100)}>
           <Pressable
             style={styles.userCard}
-            onPress={isAnonymous ? () => router.push('/(auth)/login') : undefined}
+            onPress={isAnonymous ? () => router.push('/(auth)/login?from=settings') : undefined}
           >
             <View style={styles.userAvatarWrapper}>
               <View style={styles.userAvatar}>
