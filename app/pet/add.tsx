@@ -171,7 +171,7 @@ export default function AddPetScreen() {
       <StatusBar style="dark" />
 
       {/* Top bar */}
-      <View style={[styles.topBar, { paddingTop: insets.top + Spacing.sm }]}>
+      <View style={[styles.topBar, { paddingTop: Spacing.md }]}>
         <Pressable onPress={() => router.back()} style={styles.closeBtn}>
           <X size={18} color={Colors.textSecondary} />
         </Pressable>

@@ -159,7 +159,7 @@ export default function PremiumScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Hero */}
-        <View style={[styles.hero, { paddingTop: insets.top + Spacing.md }]}>
+        <View style={[styles.hero, { paddingTop: Spacing.lg }]}>
           <PawDecorations />
 
           {/* Close button */}
