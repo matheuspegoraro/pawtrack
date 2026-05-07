@@ -1,10 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/stores/auth';
 import { usePremiumStore } from '@/stores/premium';
 import { registerForPushNotifications, addNotificationResponseListener } from '@/lib/notifications';
 import 'react-native-reanimated';
+
+// Immediately hide the JS-level splash so only the native one shows
+SplashScreen.hideAsync().catch(() => {});
 
 export default function RootLayout() {
   const { initialize, session } = useAuthStore();
