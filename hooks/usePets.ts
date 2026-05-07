@@ -1,13 +1,13 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
+import { appEvents, DATA_CHANGED } from '@/lib/events';
 import type { Pet } from '@/types';
 
 export function usePets() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const user = useAuthStore((s) => s.user);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const fetchPets = useCallback(async () => {
     if (!user) return;
@@ -26,42 +26,9 @@ export function usePets() {
 
   useEffect(() => {
     fetchPets();
-
-    if (!user) return;
-
-    const channel = supabase
-      .channel(`pets:${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pets',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setPets((prev) => [payload.new as Pet, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setPets((prev) =>
-              prev.map((p) => (p.id === (payload.new as Pet).id ? (payload.new as Pet) : p))
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setPets((prev) => prev.filter((p) => p.id !== (payload.old as Pet).id));
-          }
-        }
-      )
-      .subscribe();
-
-    channelRef.current = channel;
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [user, fetchPets]);
+    const unsub = appEvents.on(DATA_CHANGED, fetchPets);
+    return unsub;
+  }, [fetchPets]);
 
   const addPet = useCallback(
     async (data: Omit<Pet, 'id' | 'user_id' | 'created_at'>) => {
