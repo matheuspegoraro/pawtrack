@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PawTrack - Mockups v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    /* ============================= */
+    /* DESIGN TOKENS                 */
+    /* ============================= */
+    :root {
+      --terracotta: oklch(0.62 0.14 40);
+      --terracotta-light: oklch(0.94 0.03 40);
+      --terracotta-dark: oklch(0.52 0.15 40);
+      --sand: oklch(0.96 0.015 80);
+      --cream: oklch(0.98 0.008 80);
+      --warm-white: oklch(0.995 0.004 80);
+      --amber: oklch(0.72 0.15 75);
+      --amber-light: oklch(0.95 0.04 75);
+      --sage: oklch(0.68 0.08 155);
+      --sage-light: oklch(0.94 0.03 155);
+      --coral: oklch(0.65 0.18 25);
+      --coral-light: oklch(0.94 0.04 25);
+      --plum: oklch(0.55 0.12 320);
+      --plum-light: oklch(0.93 0.04 320);
+      --text-primary: oklch(0.25 0.02 40);
+      --text-secondary: oklch(0.50 0.02 40);
+      --text-tertiary: oklch(0.65 0.015 40);
+      --border: oklch(0.90 0.01 40);
+      --shadow-sm: 0 1px 3px oklch(0.25 0.02 40 / 0.06);
+      --shadow-md: 0 4px 16px oklch(0.25 0.02 40 / 0.08);
+      --shadow-lg: 0 12px 40px oklch(0.25 0.02 40 / 0.12);
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-full: 100px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Figtree', sans-serif;
+      background: oklch(0.20 0.015 40);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text-primary);
+    }
+
+    /* ============================= */
+    /* SCREEN NAV                    */
+    /* ============================= */
+    .screen-nav {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 620px;
+    }
+
+    .screen-nav button {
+      padding: 7px 14px;
+      border: 1.5px solid oklch(1 0 0 / 0.12);
+      background: oklch(1 0 0 / 0.04);
+      color: oklch(1 0 0 / 0.5);
+      border-radius: var(--radius-full);
+      font-family: 'Gabarito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .screen-nav button.active {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      color: white;
+    }
+
+    .screen-nav button:hover:not(.active) {
+      border-color: oklch(1 0 0 / 0.3);
+      color: oklch(1 0 0 / 0.85);
+    }
+
+    /* ============================= */
+    /* PHONE FRAME                   */
+    /* ============================= */
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--sand);
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 3px oklch(0.30 0.01 40),
+        0 0 0 6px oklch(0.22 0.01 40),
+        0 30px 80px oklch(0 0 0 / 0.5);
+    }
+
+    .phone-frame::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 32px;
+      background: oklch(0.15 0.01 40);
+      border-radius: 0 0 18px 18px;
+      z-index: 100;
+    }
+
+    .status-bar {
+      height: 54px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 30px 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 90;
+      background: transparent;
+    }
+
+    .status-bar.light { color: white; }
+    .status-bar.light i { color: white; }
+
+    .status-icons { display: flex; gap: 5px; align-items: center; }
+    .status-icons i { width: 16px; height: 16px; }
+
+    .screen {
+      display: none;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .screen::-webkit-scrollbar { display: none; }
+    .screen.active { display: flex; flex-direction: column; }
+
+    /* ============================= */
+    /* PAW PRINT DECORATION          */
+    /* ============================= */
+    .paw-bg {
+      position: absolute;
+      opacity: 0.04;
+      pointer-events: none;
+    }
+
+    /* ============================= */
+    /* LUCIDE ICON ANIMATIONS        */
+    /* ============================= */
+    @keyframes icon-breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    @keyframes icon-wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-8deg); }
+      75% { transform: rotate(8deg); }
+    }
+
+    @keyframes icon-bounce {
+      0%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-3px); }
+    }
+
+    @keyframes icon-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes float-up {
+      0% { opacity: 0; transform: translateY(16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes paw-press {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(0.88); }
+    }
+
+    .icon-breathe { animation: icon-breathe 2.5s ease-in-out infinite; }
+    .icon-wiggle { animation: icon-wiggle 2s ease-in-out infinite; }
+    .icon-bounce { animation: icon-bounce 1.8s ease-in-out infinite; }
+    .icon-pulse { animation: icon-pulse 2s ease-in-out infinite; }
+
+    .animate-in {
+      animation: float-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+
+    /* ============================= */
+    /* TAB BAR                       */
+    /* ============================= */
+    .tab-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 82px;
+      background: var(--warm-white);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-around;
+      padding-top: 8px;
+      z-index: 50;
+    }
+
+    .tab-bar::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 12px;
+      transition: all 0.2s;
+    }
+
+    .tab-item i { color: var(--text-tertiary); transition: color 0.2s; }
+    .tab-item span {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      letter-spacing: 0.2px;
+      transition: color 0.2s;
+    }
+
+    .tab-item.active i { color: var(--terracotta); }
+    .tab-item.active span { color: var(--terracotta); }
+
+    /* PAW BUTTON */
+    .tab-paw {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -28px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .tab-paw::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: oklch(0.62 0.14 40 / 0.15);
+      z-index: -1;
+    }
+
+    .tab-paw:hover {
+      transform: scale(1.08);
+    }
+
+    .tab-paw:active {
+      animation: paw-press 0.3s ease;
+    }
+
+    .tab-paw svg {
+      width: 26px;
+      height: 26px;
+      fill: white;
+    }
+
+    /* ============================= */
+    /* ONBOARDING                    */
+    /* ============================= */
+    .onboarding {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--warm-white);
+      position: relative;
+    }
+
+    .onboarding-top {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: var(--space-lg);
+      padding-top: 54px;
+    }
+
+    .onboarding-top::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -30%;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: var(--terracotta-light);
+    }
+
+    .onboarding-top::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -20%;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: var(--amber-light);
+    }
+
+    .onboarding-top object {
+      width: 88%;
+      max-height: 340px;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 8px 24px oklch(0.25 0.02 40 / 0.08));
+    }
+
+    .onboarding-bottom {
+      padding: var(--space-xl) var(--space-lg) 44px;
+    }
+
+    .onboarding-bottom h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 30px;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-bottom: var(--space-sm);
+      letter-spacing: -0.5px;
+    }
+
+    .onboarding-bottom h1 .highlight {
+      color: var(--terracotta);
+    }
+
+    .onboarding-bottom p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-lg);
+      max-width: 30ch;
+    }
+
+    .onboarding-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: var(--space-lg);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s;
+    }
+
+    .dot.active {
+      width: 20px;
+      border-radius: 3px;
+      background: var(--terracotta);
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 15px var(--space-lg);
+      border-radius: var(--radius-md);
+      font-family: 'Gabarito', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--terracotta);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--terracotta-dark); }
+
+    .btn-primary i { transition: transform 0.2s; }
+    .btn-primary:hover i { transform: translateX(3px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      padding: 12px;
+    }
+
+    /* ============================= */
+    /* HOME SCREEN                   */
+    /* ============================= */
+    .home {
+      flex: 1;
+      background: var(--sand);
+      padding-bottom: 90px;
+    }
+
+    .home-header {
+      background: var(--warm-white);
+      padding: var(--space-md) var(--space-lg) var(--space-lg);
+      padding-top: 58px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative paw prints in header */
+    .home-header::after {
+      content: '';
+      position: absolute;
+      top: 10px;
+      right: -10px;
+      width: 120px;
+      height: 120px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23c4642a' opacity='0.04'%3E%3Cellipse cx='35' cy='25' rx='12' ry='14' transform='rotate(-15 35 25)'/%3E%3Cellipse cx='65' cy='25' rx='12' ry='14' transform='rotate(15 65 25)'/%3E%3Cellipse cx='22' cy='50' rx='10' ry='12' transform='rotate(-30 22 50)'/%3E%3Cellipse cx='78' cy='50' rx='10' ry='12' transform='rotate(30 78 50)'/%3E%3Cellipse cx='50' cy='68' rx='22' ry='20'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+      pointer-events: none;
+    }
+
+    .home-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .greeting-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.3px;
+    }
+
+    .greeting-name {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .home-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--terracotta-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .home-avatar i { color: var(--terracotta); }
+
+    .pets-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 2px 0;
+    }
+    .pets-row::-webkit-scrollbar { display: none; }
+
+    .pet-pill {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px 6px 6px;
+      background: var(--sand);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.25s;
+      border: 2px solid transparent;
+    }
+
+    .pet-pill.active {
+      background: var(--terracotta-light);
+      border-color: var(--terracotta);
+    }
+
+    .pet-pill img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .pet-pill span {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .pet-add-btn {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      align-self: center;
+      transition: all 0.2s;
+    }
+
+    .pet-add-btn:hover {
+      border-color: var(--terracotta);
+    }
+
+    .pet-add-btn i { color: var(--text-tertiary); width: 14px; height: 14px; }
+
+    /* Section */
+    .section {
+      padding: var(--space-lg) var(--space-lg) 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .section-title {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .section-action {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--terracotta);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Task Row */
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--warm-white);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .task-row:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .task-icon-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .task-icon-wrap.vaccine { background: var(--plum-light); }
+    .task-icon-wrap.vaccine i { color: var(--plum); }
+    .task-icon-wrap.meds { background: var(--amber-light); }
+    .task-icon-wrap.meds i { color: var(--amber); }
+    .task-icon-wrap.checkup { background: var(--sage-light); }
+    .task-icon-wrap.checkup i { color: var(--sage); }
+    .task-icon-wrap.urgent { background: var(--coral-light); }
+    .task-icon-wrap.urgent i { color: var(--coral); }
+
+    .task-body { flex: 1; min-width: 0; }
+
+    .task-name {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .task-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .task-badge {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-time { background: var(--sand); color: var(--text-secondary); }
+    .badge-overdue { background: var(--coral-light); color: var(--coral); }
+    .badge-today { background: var(--amber-light); color: var(--amber); }
+    .badge-ok { background: var(--sage-light); color: var(--sage); }
+
+    /* Upcoming row */
+    .upcoming-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      background: var(--warm-white);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    .upcoming-cal {
+      width: 46px;
+      height: 50px;
+      border-radius: var(--radius-sm);
+      background: var(--terracotta-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .upcoming-cal .cal-month {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--terracotta);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .upcoming-cal .cal-day {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--terracotta-dark);
+      line-height: 1;
+    }
+
+    .upcoming-body { flex: 1; min-width: 0; }
+
+    .upcoming-title {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .upcoming-detail {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .upcoming-pet-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* ============================= */
+    /* PET PROFILE                   */
+    /* ============================= */
+    .pet-profile {
+      flex: 1;
+      background: var(--sand);
+      padding-bottom: 90px;
+    }
+
+    .profile-hero {
+      background: var(--terracotta);
+      padding: 12px var(--space-lg) 56px;
+      padding-top: 58px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Paw prints background in hero */
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='white' opacity='0.06'%3E%3Cellipse cx='35' cy='25' rx='12' ry='14' transform='rotate(-15 35 25)'/%3E%3Cellipse cx='65' cy='25' rx='12' ry='14' transform='rotate(15 65 25)'/%3E%3Cellipse cx='22' cy='50' rx='10' ry='12' transform='rotate(-30 22 50)'/%3E%3Cellipse cx='78' cy='50' rx='10' ry='12' transform='rotate(30 78 50)'/%3E%3Cellipse cx='50' cy='68' rx='22' ry='20'/%3E%3C/svg%3E") no-repeat;
+      background-position: 110% -20px;
+      background-size: 140px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .profile-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-nav-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: oklch(1 0 0 / 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+    }
+
+    .profile-nav-btn i { color: white; }
+
+    .profile-photo {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 4px solid oklch(1 0 0 / 0.3);
+      object-fit: cover;
+      margin-bottom: var(--space-sm);
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-hero h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: white;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-hero .breed {
+      font-size: 14px;
+      color: oklch(1 0 0 / 0.75);
+      margin-top: 2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-hero .chip-id {
+      font-size: 12px;
+      color: oklch(1 0 0 / 0.5);
+      font-family: 'Gabarito', sans-serif;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-sm);
+      padding: 0 var(--space-lg);
+      margin-top: -32px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stat-card {
+      background: var(--warm-white);
+      border-radius: var(--radius-sm);
+      padding: 12px 4px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-value {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* Filter pills */
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      padding: 20px var(--space-lg) 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+
+    .filter-pill {
+      padding: 7px 14px;
+      border-radius: var(--radius-full);
+      font-family: 'Gabarito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      background: var(--warm-white);
+      color: var(--text-secondary);
+    }
+
+    .filter-pill.active {
+      background: var(--terracotta);
+      color: white;
+    }
+
+    /* Timeline */
+    .timeline {
+      padding: var(--space-lg);
+    }
+
+    .tl-item {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      margin-bottom: var(--space-lg);
+    }
+
+    .tl-line {
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -24px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .tl-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .tl-dot.vaccine { background: var(--plum-light); }
+    .tl-dot.vaccine i { color: var(--plum); }
+    .tl-dot.meds { background: var(--amber-light); }
+    .tl-dot.meds i { color: var(--amber); }
+    .tl-dot.checkup { background: var(--sage-light); }
+    .tl-dot.checkup i { color: var(--sage); }
+    .tl-dot.weight { background: var(--terracotta-light); }
+    .tl-dot.weight i { color: var(--terracotta); }
+
+    .tl-card {
+      flex: 1;
+      background: var(--warm-white);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .tl-card h4 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .tl-card p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .tl-date {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+    }
+
+    /* ============================= */
+    /* ADD RECORD                    */
+    /* ============================= */
+    .add-record {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--warm-white);
+    }
+
+    .add-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px var(--space-lg);
+      padding-top: 58px;
+      background: var(--warm-white);
+    }
+
+    .add-top h2 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--sand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .close-btn i { color: var(--text-secondary); }
+
+    .add-body {
+      flex: 1;
+      padding: var(--space-lg);
+      padding-top: var(--space-sm);
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .add-body::-webkit-scrollbar { display: none; }
+
+    /* Type selector */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .type-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 4px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      font-family: 'Gabarito', sans-serif;
+    }
+
+    .type-option i { color: var(--text-tertiary); transition: color 0.2s; }
+
+    .type-option span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      transition: color 0.2s;
+    }
+
+    .type-option.active {
+      border-color: var(--terracotta);
+      background: var(--terracotta-light);
+    }
+
+    .type-option.active i { color: var(--terracotta); }
+    .type-option.active span { color: var(--terracotta); }
+
+    /* Form */
+    .field { margin-bottom: var(--space-md); }
+
+    .field-label {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Figtree', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      background: var(--sand);
+      transition: all 0.2s;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--terracotta);
+      background: var(--warm-white);
+    }
+
+    .field-input::placeholder { color: var(--text-tertiary); }
+
+    .field-input.textarea {
+      resize: none;
+      min-height: 72px;
+      font-family: 'Figtree', sans-serif;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .field-row .field { flex: 1; }
+
+    .upload-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 14px;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      width: 100%;
+      font-family: 'Gabarito', sans-serif;
+    }
+
+    .upload-area:hover {
+      border-color: var(--terracotta);
+      color: var(--terracotta);
+    }
+
+    .add-footer {
+      padding: var(--space-md) var(--space-lg) 36px;
+    }
+
+    /* ============================= */
+    /* REMINDERS                     */
+    /* ============================= */
+    .reminders-screen {
+      flex: 1;
+      background: var(--sand);
+      padding-bottom: 90px;
+    }
+
+    .reminders-top {
+      background: var(--warm-white);
+      padding: 12px var(--space-lg) var(--space-md);
+      padding-top: 58px;
+    }
+
+    .reminders-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .reminders-top h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .reminders-illo {
+      display: flex;
+      justify-content: center;
+      padding: var(--space-sm) 0;
+    }
+
+    .reminders-illo object {
+      width: 65%;
+      max-height: 170px;
+    }
+
+    .reminders-list {
+      padding: var(--space-lg) var(--space-lg) 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .reminder-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--warm-white);
+      border-radius: var(--radius-md);
+    }
+
+    /* ============================= */
+    /* PREMIUM                       */
+    /* ============================= */
+    .premium-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--warm-white);
+      position: relative;
+    }
+
+    .premium-x {
+      position: absolute;
+      top: 6px;
+      right: var(--space-lg);
+      z-index: 10;
+    }
+
+    .premium-top {
+      background: var(--terracotta);
+      padding: 36px var(--space-lg) 48px;
+      padding-top: 62px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-top::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='white' opacity='0.05'%3E%3Cellipse cx='35' cy='25' rx='12' ry='14' transform='rotate(-15 35 25)'/%3E%3Cellipse cx='65' cy='25' rx='12' ry='14' transform='rotate(15 65 25)'/%3E%3Cellipse cx='22' cy='50' rx='10' ry='12' transform='rotate(-30 22 50)'/%3E%3Cellipse cx='78' cy='50' rx='10' ry='12' transform='rotate(30 78 50)'/%3E%3Cellipse cx='50' cy='68' rx='22' ry='20'/%3E%3C/svg%3E") no-repeat;
+      background-position: -30px 50%;
+      background-size: 100px;
+      pointer-events: none;
+    }
+
+    .premium-top::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: var(--warm-white);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .premium-top .crown {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: oklch(1 0 0 / 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-md);
+      position: relative;
+      z-index: 1;
+    }
+
+    .premium-top .crown i { color: white; }
+
+    .premium-top h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .premium-top p {
+      font-size: 14px;
+      color: oklch(1 0 0 / 0.75);
+      position: relative;
+      z-index: 1;
+    }
+
+    .premium-features {
+      padding: var(--space-lg) var(--space-lg) var(--space-md);
+      flex: 1;
+    }
+
+    .prem-feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: var(--space-lg);
+    }
+
+    .prem-feat-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .prem-feat h4 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .prem-feat p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .plan-row {
+      display: flex;
+      gap: 10px;
+      padding: 0 var(--space-lg);
+      margin-bottom: var(--space-md);
+    }
+
+    .plan-card {
+      flex: 1;
+      padding: var(--space-md);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .plan-card.selected {
+      border-color: var(--terracotta);
+      background: var(--terracotta-light);
+    }
+
+    .plan-label {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .plan-amount {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--text-primary);
+    }
+
+    .plan-amount small {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .plan-save {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sage);
+      margin-top: 2px;
+    }
+
+    .plan-popular {
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--terracotta);
+      color: white;
+      font-family: 'Gabarito', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+    }
+
+    .premium-bottom {
+      padding: 0 var(--space-lg) 40px;
+    }
+
+    .trial-note {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: var(--space-sm);
+    }
+
+    /* ============================= */
+    /* EXPORT                        */
+    /* ============================= */
+    .export-screen {
+      flex: 1;
+      background: var(--sand);
+      padding-bottom: 90px;
+    }
+
+    .export-top {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: 12px var(--space-lg) var(--space-md);
+      padding-top: 58px;
+      background: var(--warm-white);
+    }
+
+    .export-top h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .back-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--sand);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .back-btn i { color: var(--text-primary); }
+
+    .pdf-preview {
+      margin: var(--space-lg);
+      background: var(--warm-white);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .pdf-head {
+      background: var(--terracotta);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pdf-head img {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 3px solid oklch(1 0 0 / 0.3);
+      object-fit: cover;
+    }
+
+    .pdf-head h3 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .pdf-head p {
+      font-size: 12px;
+      color: oklch(1 0 0 / 0.7);
+    }
+
+    .pdf-body {
+      padding: var(--space-lg);
+    }
+
+    .pdf-section {
+      margin-bottom: var(--space-md);
+    }
+
+    .pdf-section h4 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--terracotta);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding-bottom: 6px;
+      margin-bottom: var(--space-sm);
+      position: relative;
+    }
+
+    .pdf-section h4::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--terracotta-light);
+    }
+
+    .pdf-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 13px;
+    }
+
+    .pdf-row .l { color: var(--text-secondary); }
+    .pdf-row .r { color: var(--text-primary); font-weight: 600; }
+
+    .export-btns {
+      padding: var(--space-lg);
+      padding-top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-outline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 14px;
+      background: var(--warm-white);
+      color: var(--terracotta);
+      border: 2px solid var(--terracotta);
+      border-radius: var(--radius-md);
+      font-family: 'Gabarito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* Attribution */
+    .attribution {
+      text-align: center;
+      padding: var(--space-lg);
+      font-size: 12px;
+      color: oklch(1 0 0 / 0.3);
+    }
+
+    .attribution a { color: oklch(1 0 0 / 0.5); }
+  </style>
+</head>
+<body>
+
+<nav class="screen-nav">
+  <button class="active" onclick="showScreen('onboarding')">Onboarding</button>
+  <button onclick="showScreen('home')">Home</button>
+  <button onclick="showScreen('profile')">Pet Profile</button>
+  <button onclick="showScreen('add')">Add Record</button>
+  <button onclick="showScreen('reminders')">Reminders</button>
+  <button onclick="showScreen('premium')">Premium</button>
+  <button onclick="showScreen('export')">Export PDF</button>
+</nav>
+
+<div class="phone-frame">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span class="status-icons">
+      <i data-lucide="wifi" style="width:15px;height:15px"></i>
+      <i data-lucide="battery-full" style="width:18px;height:18px"></i>
+    </span>
+  </div>
+
+  <!-- ========== ONBOARDING ========== -->
+  <div class="screen active" id="screen-onboarding">
+    <div class="onboarding">
+      <div class="onboarding-top">
+        <object type="image/svg+xml" data="https://stories.freepiklabs.com/storage/61924/Pet-Care_Mesa-de-trabajo-1.svg"></object>
+      </div>
+      <div class="onboarding-bottom">
+        <h1>Your pet's health,<br><span class="highlight">always with you</span></h1>
+        <p>Vaccines, meds, vet visits — tracked and reminded, so you never miss a thing.</p>
+        <div class="onboarding-dots">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <button class="btn btn-primary">
+          Get Started
+          <i data-lucide="arrow-right" style="width:18px;height:18px"></i>
+        </button>
+        <button class="btn btn-ghost">I already have an account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HOME ========== -->
+  <div class="screen" id="screen-home">
+    <div class="home">
+      <div class="home-header">
+        <div class="home-top">
+          <div>
+            <div class="greeting-text">Good morning</div>
+            <div class="greeting-name">Sarah</div>
+          </div>
+          <div class="home-avatar">
+            <i data-lucide="user" style="width:20px;height:20px"></i>
+          </div>
+        </div>
+        <div class="pets-row">
+          <div class="pet-pill active">
+            <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop&crop=face" alt="Max">
+            <span>Max</span>
+          </div>
+          <div class="pet-pill">
+            <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop&crop=face" alt="Luna">
+            <span>Luna</span>
+          </div>
+          <div class="pet-pill">
+            <img src="https://images.unsplash.com/photo-1596854407944-bf87f6fcebc4?w=100&h=100&fit=crop&crop=face" alt="Buddy">
+            <span>Buddy</span>
+          </div>
+          <div class="pet-add-btn">
+            <i data-lucide="plus" style="width:14px;height:14px"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <span class="section-title">Today</span>
+          <span class="section-action">View all</span>
+        </div>
+
+        <div class="task-row animate-in" style="animation-delay:0.05s">
+          <div class="task-icon-wrap meds">
+            <i data-lucide="pill" class="icon-bounce" style="width:20px;height:20px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Heartworm Pill</div>
+            <div class="task-sub">Max — Monthly dose</div>
+          </div>
+          <span class="task-badge badge-time">8:00 AM</span>
+        </div>
+
+        <div class="task-row animate-in" style="animation-delay:0.1s">
+          <div class="task-icon-wrap vaccine">
+            <i data-lucide="syringe" class="icon-wiggle" style="width:20px;height:20px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Rabies Vaccine</div>
+            <div class="task-sub">Luna — Annual booster</div>
+          </div>
+          <span class="task-badge badge-time">2:30 PM</span>
+        </div>
+
+        <div class="task-row animate-in" style="animation-delay:0.15s">
+          <div class="task-icon-wrap urgent">
+            <i data-lucide="triangle-alert" class="icon-pulse" style="width:20px;height:20px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Flea Treatment</div>
+            <div class="task-sub">Max — 3 days overdue</div>
+          </div>
+          <span class="task-badge badge-overdue">Overdue</span>
+        </div>
+      </div>
+
+      <div class="section" style="padding-bottom:var(--space-lg)">
+        <div class="section-head">
+          <span class="section-title">Upcoming</span>
+        </div>
+
+        <div class="upcoming-row animate-in" style="animation-delay:0.2s">
+          <div class="upcoming-cal">
+            <span class="cal-month">May</span>
+            <span class="cal-day">12</span>
+          </div>
+          <div class="upcoming-body">
+            <div class="upcoming-title">Annual Checkup</div>
+            <div class="upcoming-detail">Dr. Miller — City Vet Clinic</div>
+          </div>
+          <img class="upcoming-pet-avatar" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop&crop=face" alt="Max">
+        </div>
+
+        <div class="upcoming-row animate-in" style="animation-delay:0.25s">
+          <div class="upcoming-cal">
+            <span class="cal-month">May</span>
+            <span class="cal-day">20</span>
+          </div>
+          <div class="upcoming-body">
+            <div class="upcoming-title">DHPP Vaccine</div>
+            <div class="upcoming-detail">Buddy — Booster shot</div>
+          </div>
+          <img class="upcoming-pet-avatar" src="https://images.unsplash.com/photo-1596854407944-bf87f6fcebc4?w=100&h=100&fit=crop&crop=face" alt="Buddy">
+        </div>
+
+        <div class="upcoming-row animate-in" style="animation-delay:0.3s">
+          <div class="upcoming-cal">
+            <span class="cal-month">Jun</span>
+            <span class="cal-day">03</span>
+          </div>
+          <div class="upcoming-body">
+            <div class="upcoming-title">Dental Cleaning</div>
+            <div class="upcoming-detail">Luna — Scheduled procedure</div>
+          </div>
+          <img class="upcoming-pet-avatar" src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop&crop=face" alt="Luna">
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item active">
+        <i data-lucide="house" style="width:22px;height:22px"></i>
+        <span>Home</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="calendar" style="width:22px;height:22px"></i>
+        <span>Calendar</span>
+      </div>
+      <div class="tab-item" style="width:54px">
+        <div class="tab-paw" title="Add record">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="35" cy="22" rx="13" ry="15" transform="rotate(-12 35 22)"/>
+            <ellipse cx="65" cy="22" rx="13" ry="15" transform="rotate(12 65 22)"/>
+            <ellipse cx="20" cy="50" rx="11" ry="13" transform="rotate(-25 20 50)"/>
+            <ellipse cx="80" cy="50" rx="11" ry="13" transform="rotate(25 80 50)"/>
+            <ellipse cx="50" cy="68" rx="24" ry="21"/>
+          </svg>
+        </div>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="bell" style="width:22px;height:22px"></i>
+        <span>Alerts</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="settings" style="width:22px;height:22px"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PET PROFILE ========== -->
+  <div class="screen" id="screen-profile">
+    <div class="pet-profile">
+      <div class="profile-hero">
+        <div class="profile-nav">
+          <button class="profile-nav-btn"><i data-lucide="chevron-left" style="width:20px;height:20px"></i></button>
+          <button class="profile-nav-btn"><i data-lucide="ellipsis" style="width:20px;height:20px"></i></button>
+        </div>
+        <img class="profile-photo" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop&crop=face" alt="Max">
+        <h1>Max</h1>
+        <div class="breed">Golden Retriever &bull; Male</div>
+        <div class="chip-id">CHIP 985112007654321</div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat-card">
+          <div class="stat-value">3y</div>
+          <div class="stat-label">Age</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">72lb</div>
+          <div class="stat-label">Weight</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Records</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--sage)"><i data-lucide="circle-check-big" style="width:18px;height:18px" class="icon-breathe"></i></div>
+          <div class="stat-label">Current</div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-pill active">All</button>
+        <button class="filter-pill">Vaccines</button>
+        <button class="filter-pill">Medications</button>
+        <button class="filter-pill">Visits</button>
+        <button class="filter-pill">Weight</button>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot vaccine"><i data-lucide="syringe" style="width:18px;height:18px"></i></div>
+          <div class="tl-line"></div>
+          <div class="tl-card">
+            <h4>Bordetella Vaccine</h4>
+            <p>City Vet Clinic, Dr. Miller. Next dose in 12 months.</p>
+            <div class="tl-date">Apr 15, 2026</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot weight"><i data-lucide="weight" style="width:18px;height:18px"></i></div>
+          <div class="tl-line"></div>
+          <div class="tl-card">
+            <h4>Weight Check — 72 lb</h4>
+            <p>Stable weight. Maintaining current diet.</p>
+            <div class="tl-date">Apr 15, 2026</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot meds"><i data-lucide="pill" style="width:18px;height:18px"></i></div>
+          <div class="tl-line"></div>
+          <div class="tl-card">
+            <h4>Heartworm Prevention</h4>
+            <p>Heartgard Plus — Monthly chewable tablet.</p>
+            <div class="tl-date">Apr 1, 2026</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot checkup"><i data-lucide="stethoscope" style="width:18px;height:18px"></i></div>
+          <div class="tl-line"></div>
+          <div class="tl-card">
+            <h4>Annual Checkup</h4>
+            <p>Overall health: excellent. Blood work normal.</p>
+            <div class="tl-date">Mar 10, 2026</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot vaccine"><i data-lucide="syringe" style="width:18px;height:18px"></i></div>
+          <div class="tl-card">
+            <h4>DHPP Vaccine</h4>
+            <p>Distemper, Hepatitis, Parainfluenza, Parvovirus booster.</p>
+            <div class="tl-date">Mar 10, 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item">
+        <i data-lucide="house" style="width:22px;height:22px"></i>
+        <span>Home</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="calendar" style="width:22px;height:22px"></i>
+        <span>Calendar</span>
+      </div>
+      <div class="tab-item" style="width:54px">
+        <div class="tab-paw">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="35" cy="22" rx="13" ry="15" transform="rotate(-12 35 22)"/>
+            <ellipse cx="65" cy="22" rx="13" ry="15" transform="rotate(12 65 22)"/>
+            <ellipse cx="20" cy="50" rx="11" ry="13" transform="rotate(-25 20 50)"/>
+            <ellipse cx="80" cy="50" rx="11" ry="13" transform="rotate(25 80 50)"/>
+            <ellipse cx="50" cy="68" rx="24" ry="21"/>
+          </svg>
+        </div>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="bell" style="width:22px;height:22px"></i>
+        <span>Alerts</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="settings" style="width:22px;height:22px"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ADD RECORD ========== -->
+  <div class="screen" id="screen-add">
+    <div class="add-record">
+      <div class="add-top">
+        <button class="close-btn"><i data-lucide="x" style="width:18px;height:18px"></i></button>
+        <h2>New Record</h2>
+        <div style="width:32px"></div>
+      </div>
+
+      <div class="add-body">
+        <div class="field">
+          <label class="field-label">Record type</label>
+          <div class="type-grid">
+            <button class="type-option active">
+              <i data-lucide="syringe" style="width:22px;height:22px"></i>
+              <span>Vaccine</span>
+            </button>
+            <button class="type-option">
+              <i data-lucide="pill" style="width:22px;height:22px"></i>
+              <span>Meds</span>
+            </button>
+            <button class="type-option">
+              <i data-lucide="stethoscope" style="width:22px;height:22px"></i>
+              <span>Visit</span>
+            </button>
+            <button class="type-option">
+              <i data-lucide="weight" style="width:22px;height:22px"></i>
+              <span>Weight</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Pet</label>
+          <div class="pets-row" style="gap:8px">
+            <div class="pet-pill active" style="padding:5px 12px 5px 5px">
+              <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop&crop=face" alt="Max" style="width:26px;height:26px">
+              <span style="font-size:13px">Max</span>
+            </div>
+            <div class="pet-pill" style="padding:5px 12px 5px 5px">
+              <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop&crop=face" alt="Luna" style="width:26px;height:26px">
+              <span style="font-size:13px">Luna</span>
+            </div>
+            <div class="pet-pill" style="padding:5px 12px 5px 5px">
+              <img src="https://images.unsplash.com/photo-1596854407944-bf87f6fcebc4?w=100&h=100&fit=crop&crop=face" alt="Buddy" style="width:26px;height:26px">
+              <span style="font-size:13px">Buddy</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Vaccine name</label>
+          <input class="field-input" type="text" placeholder="e.g. Rabies, DHPP, Bordetella...">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Date given</label>
+            <input class="field-input" type="text" value="May 6, 2026">
+          </div>
+          <div class="field">
+            <label class="field-label">Next due</label>
+            <input class="field-input" type="text" placeholder="Auto-calculated">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Veterinarian</label>
+          <input class="field-input" type="text" placeholder="Dr. name or clinic">
+        </div>
+
+        <div class="field">
+          <label class="field-label">Notes</label>
+          <textarea class="field-input textarea" placeholder="Any additional notes..."></textarea>
+        </div>
+
+        <div class="field">
+          <button class="upload-area">
+            <i data-lucide="camera" style="width:18px;height:18px"></i>
+            Add photo of document
+          </button>
+        </div>
+      </div>
+
+      <div class="add-footer">
+        <button class="btn btn-primary">
+          <i data-lucide="check" style="width:18px;height:18px"></i>
+          Save Record
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REMINDERS ========== -->
+  <div class="screen" id="screen-reminders">
+    <div class="reminders-screen">
+      <div class="reminders-top">
+        <div class="reminders-top-row">
+          <h1>Reminders</h1>
+          <i data-lucide="plus-circle" style="width:24px;height:24px;color:var(--terracotta);cursor:pointer" class="icon-breathe"></i>
+        </div>
+        <div class="reminders-illo">
+          <object type="image/svg+xml" data="https://stories.freepiklabs.com/storage/31649/Reminders_Mesa-de-trabajo-1.svg"></object>
+        </div>
+      </div>
+
+      <div class="reminders-list">
+        <div class="reminder-row animate-in" style="animation-delay:0.05s">
+          <div class="task-icon-wrap urgent" style="width:38px;height:38px">
+            <i data-lucide="bug" class="icon-pulse" style="width:18px;height:18px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Flea Treatment — Max</div>
+            <div class="task-sub">Every 3 months</div>
+          </div>
+          <span class="task-badge badge-overdue">Overdue</span>
+        </div>
+
+        <div class="reminder-row animate-in" style="animation-delay:0.1s">
+          <div class="task-icon-wrap meds" style="width:38px;height:38px">
+            <i data-lucide="pill" class="icon-bounce" style="width:18px;height:18px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Heartworm Pill — Max</div>
+            <div class="task-sub">Monthly — Next: May 6</div>
+          </div>
+          <span class="task-badge badge-today">Today</span>
+        </div>
+
+        <div class="reminder-row animate-in" style="animation-delay:0.15s">
+          <div class="task-icon-wrap vaccine" style="width:38px;height:38px">
+            <i data-lucide="syringe" class="icon-wiggle" style="width:18px;height:18px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Rabies Vaccine — Luna</div>
+            <div class="task-sub">Annual — Next: May 6</div>
+          </div>
+          <span class="task-badge badge-today">Today</span>
+        </div>
+
+        <div class="reminder-row animate-in" style="animation-delay:0.2s">
+          <div class="task-icon-wrap checkup" style="width:38px;height:38px">
+            <i data-lucide="stethoscope" style="width:18px;height:18px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Annual Checkup — Max</div>
+            <div class="task-sub">May 12, 2026</div>
+          </div>
+          <span class="task-badge badge-ok">In 6 days</span>
+        </div>
+
+        <div class="reminder-row animate-in" style="animation-delay:0.25s">
+          <div class="task-icon-wrap vaccine" style="width:38px;height:38px">
+            <i data-lucide="syringe" style="width:18px;height:18px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">DHPP Vaccine — Buddy</div>
+            <div class="task-sub">May 20, 2026</div>
+          </div>
+          <span class="task-badge badge-ok">In 14 days</span>
+        </div>
+
+        <div class="reminder-row animate-in" style="animation-delay:0.3s">
+          <div class="task-icon-wrap checkup" style="width:38px;height:38px">
+            <i data-lucide="heart-pulse" style="width:18px;height:18px"></i>
+          </div>
+          <div class="task-body">
+            <div class="task-name">Dental Cleaning — Luna</div>
+            <div class="task-sub">Jun 3, 2026</div>
+          </div>
+          <span class="task-badge badge-ok">In 28 days</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item">
+        <i data-lucide="house" style="width:22px;height:22px"></i>
+        <span>Home</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="calendar" style="width:22px;height:22px"></i>
+        <span>Calendar</span>
+      </div>
+      <div class="tab-item" style="width:54px">
+        <div class="tab-paw">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="35" cy="22" rx="13" ry="15" transform="rotate(-12 35 22)"/>
+            <ellipse cx="65" cy="22" rx="13" ry="15" transform="rotate(12 65 22)"/>
+            <ellipse cx="20" cy="50" rx="11" ry="13" transform="rotate(-25 20 50)"/>
+            <ellipse cx="80" cy="50" rx="11" ry="13" transform="rotate(25 80 50)"/>
+            <ellipse cx="50" cy="68" rx="24" ry="21"/>
+          </svg>
+        </div>
+      </div>
+      <div class="tab-item active">
+        <i data-lucide="bell" style="width:22px;height:22px"></i>
+        <span>Alerts</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="settings" style="width:22px;height:22px"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PREMIUM ========== -->
+  <div class="screen" id="screen-premium">
+    <div class="premium-screen">
+      <div class="premium-x">
+        <button class="close-btn"><i data-lucide="x" style="width:18px;height:18px"></i></button>
+      </div>
+      <div class="premium-top">
+        <div class="crown">
+          <i data-lucide="crown" class="icon-wiggle" style="width:24px;height:24px"></i>
+        </div>
+        <h1>Unlock PawTrack Pro</h1>
+        <p>Everything to keep your pets healthy</p>
+      </div>
+
+      <div class="premium-features">
+        <div class="prem-feat">
+          <div class="prem-feat-icon" style="background:var(--plum-light)">
+            <i data-lucide="file-text" style="width:18px;height:18px;color:var(--plum)"></i>
+          </div>
+          <div>
+            <h4>Export Health Reports</h4>
+            <p>Share PDF records with vets, pet sitters or for travel</p>
+          </div>
+        </div>
+        <div class="prem-feat">
+          <div class="prem-feat-icon" style="background:var(--amber-light)">
+            <i data-lucide="bell-ring" style="width:18px;height:18px;color:var(--amber)" class="icon-wiggle"></i>
+          </div>
+          <div>
+            <h4>Smart Reminders</h4>
+            <p>Auto-recurring alerts for meds, vaccines & checkups</p>
+          </div>
+        </div>
+        <div class="prem-feat">
+          <div class="prem-feat-icon" style="background:var(--sage-light)">
+            <i data-lucide="trending-up" style="width:18px;height:18px;color:var(--sage)"></i>
+          </div>
+          <div>
+            <h4>Weight & Health Trends</h4>
+            <p>Visual charts to track your pet's progress over time</p>
+          </div>
+        </div>
+        <div class="prem-feat">
+          <div class="prem-feat-icon" style="background:var(--terracotta-light)">
+            <i data-lucide="users" style="width:18px;height:18px;color:var(--terracotta)"></i>
+          </div>
+          <div>
+            <h4>Family Sharing</h4>
+            <p>Give family or pet sitters access to records</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="plan-row">
+        <div class="plan-card">
+          <div class="plan-label">Monthly</div>
+          <div class="plan-amount">$5.99<small>/mo</small></div>
+        </div>
+        <div class="plan-card selected">
+          <div class="plan-popular">SAVE 30%</div>
+          <div class="plan-label">Annual</div>
+          <div class="plan-amount">$49.99<small>/yr</small></div>
+          <div class="plan-save">$4.17/mo</div>
+        </div>
+      </div>
+
+      <div class="premium-bottom">
+        <button class="btn btn-primary">Start 7-Day Free Trial</button>
+        <div class="trial-note">Cancel anytime. No charge until trial ends.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EXPORT ========== -->
+  <div class="screen" id="screen-export">
+    <div class="export-screen">
+      <div class="export-top">
+        <button class="back-btn"><i data-lucide="chevron-left" style="width:18px;height:18px"></i></button>
+        <h1>Export Health Report</h1>
+      </div>
+
+      <div class="pdf-preview">
+        <div class="pdf-head">
+          <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop&crop=face" alt="Max">
+          <div>
+            <h3>Max's Health Report</h3>
+            <p>Generated May 6, 2026</p>
+          </div>
+        </div>
+        <div class="pdf-body">
+          <div class="pdf-section">
+            <h4>Pet Information</h4>
+            <div class="pdf-row"><span class="l">Breed</span><span class="r">Golden Retriever</span></div>
+            <div class="pdf-row"><span class="l">Age</span><span class="r">3 years</span></div>
+            <div class="pdf-row"><span class="l">Weight</span><span class="r">72 lb</span></div>
+            <div class="pdf-row"><span class="l">Microchip</span><span class="r">985112007654321</span></div>
+          </div>
+          <div class="pdf-section">
+            <h4>Vaccination History</h4>
+            <div class="pdf-row"><span class="l">Rabies</span><span class="r">Jan 15, 2026</span></div>
+            <div class="pdf-row"><span class="l">DHPP</span><span class="r">Mar 10, 2026</span></div>
+            <div class="pdf-row"><span class="l">Bordetella</span><span class="r">Apr 15, 2026</span></div>
+          </div>
+          <div class="pdf-section">
+            <h4>Current Medications</h4>
+            <div class="pdf-row"><span class="l">Heartgard Plus</span><span class="r">Monthly</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="export-btns">
+        <button class="btn btn-primary">
+          <i data-lucide="download" style="width:18px;height:18px"></i>
+          Download PDF
+        </button>
+        <button class="btn-outline">
+          <i data-lucide="share-2" style="width:18px;height:18px"></i>
+          Share with Vet
+        </button>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab-item">
+        <i data-lucide="house" style="width:22px;height:22px"></i>
+        <span>Home</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="calendar" style="width:22px;height:22px"></i>
+        <span>Calendar</span>
+      </div>
+      <div class="tab-item" style="width:54px">
+        <div class="tab-paw">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="35" cy="22" rx="13" ry="15" transform="rotate(-12 35 22)"/>
+            <ellipse cx="65" cy="22" rx="13" ry="15" transform="rotate(12 65 22)"/>
+            <ellipse cx="20" cy="50" rx="11" ry="13" transform="rotate(-25 20 50)"/>
+            <ellipse cx="80" cy="50" rx="11" ry="13" transform="rotate(25 80 50)"/>
+            <ellipse cx="50" cy="68" rx="24" ry="21"/>
+          </svg>
+        </div>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="bell" style="width:22px;height:22px"></i>
+        <span>Alerts</span>
+      </div>
+      <div class="tab-item">
+        <i data-lucide="settings" style="width:22px;height:22px"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="attribution">
+  Illustrations by <a href="https://storyset.com/" target="_blank">Storyset</a>
+</p>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  const darkHeaderScreens = ['profile', 'premium'];
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    document.querySelectorAll('.screen-nav button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const sb = document.querySelector('.status-bar');
+    if (darkHeaderScreens.includes(name)) {
+      sb.classList.add('light');
+    } else {
+      sb.classList.remove('light');
+    }
+
+    requestAnimationFrame(() => lucide.createIcons());
+  }
+
+  // Type selector
+  document.querySelectorAll('.type-option').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.type-option').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+
+  // Filter pills
+  document.querySelectorAll('.filter-pill').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+
+  // Pet pills
+  document.querySelectorAll('.pet-pill').forEach(el => {
+    el.addEventListener('click', () => {
+      const parent = el.closest('.pets-row');
+      parent.querySelectorAll('.pet-pill').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+
+  // Plan cards
+  document.querySelectorAll('.plan-card').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.plan-card').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+
+  // Paw press animation
+  document.querySelectorAll('.tab-paw').forEach(el => {
+    el.addEventListener('click', () => {
+      el.style.animation = 'paw-press 0.3s ease';
+      el.addEventListener('animationend', () => { el.style.animation = ''; }, { once: true });
+    });
+  });
+</script>
+
+</body>
+</html>
