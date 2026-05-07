@@ -164,7 +164,7 @@ export default function AddRecordScreen() {
     <View style={styles.root}>
       <StatusBar style="dark" />
 
-      <View style={[styles.topBar, { paddingTop: Spacing.md }]}>
+      <View style={[styles.topBar, { paddingTop: insets.top + Spacing.sm }]}>
         <Pressable onPress={() => router.back()} style={styles.closeBtn}>
           <X size={18} color={Colors.textSecondary} />
         </Pressable>
