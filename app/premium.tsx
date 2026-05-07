@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -17,13 +18,11 @@ import {
   Bell,
   TrendingUp,
   Users,
-  Check,
 } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { usePremiumStore } from '@/stores/premium';
-
-type Plan = 'monthly' | 'annual';
+import type { PurchasesPackage } from 'react-native-purchases';
 
 const FEATURES = [
   {
@@ -59,97 +58,112 @@ const FEATURES = [
 function PawDecorations() {
   return (
     <View style={styles.pawDecorationsContainer} pointerEvents="none">
-      {/* Top-left paw */}
       <Svg
-        width={48}
-        height={48}
-        viewBox="0 0 48 48"
+        width={48} height={48} viewBox="0 0 48 48"
         style={{ position: 'absolute', top: 20, left: 20, opacity: 0.15 }}
       >
         <Circle cx="15" cy="8" r="5" fill="white" />
         <Circle cx="30" cy="6" r="5.5" fill="white" />
         <Circle cx="7" cy="20" r="4.5" fill="white" />
         <Circle cx="38" cy="17" r="4.5" fill="white" />
-        <Path
-          d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z"
-          fill="white"
-        />
+        <Path d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z" fill="white" />
       </Svg>
-      {/* Top-right paw */}
       <Svg
-        width={36}
-        height={36}
-        viewBox="0 0 48 48"
+        width={36} height={36} viewBox="0 0 48 48"
         style={{ position: 'absolute', top: 12, right: 60, opacity: 0.1 }}
       >
         <Circle cx="15" cy="8" r="5" fill="white" />
         <Circle cx="30" cy="6" r="5.5" fill="white" />
         <Circle cx="7" cy="20" r="4.5" fill="white" />
         <Circle cx="38" cy="17" r="4.5" fill="white" />
-        <Path
-          d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z"
-          fill="white"
-        />
+        <Path d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z" fill="white" />
       </Svg>
-      {/* Bottom-right paw */}
       <Svg
-        width={40}
-        height={40}
-        viewBox="0 0 48 48"
+        width={40} height={40} viewBox="0 0 48 48"
         style={{ position: 'absolute', bottom: 8, right: 24, opacity: 0.12 }}
       >
         <Circle cx="15" cy="8" r="5" fill="white" />
         <Circle cx="30" cy="6" r="5.5" fill="white" />
         <Circle cx="7" cy="20" r="4.5" fill="white" />
         <Circle cx="38" cy="17" r="4.5" fill="white" />
-        <Path
-          d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z"
-          fill="white"
-        />
-      </Svg>
-      {/* Bottom-left paw */}
-      <Svg
-        width={32}
-        height={32}
-        viewBox="0 0 48 48"
-        style={{ position: 'absolute', bottom: 20, left: 40, opacity: 0.08 }}
-      >
-        <Circle cx="15" cy="8" r="5" fill="white" />
-        <Circle cx="30" cy="6" r="5.5" fill="white" />
-        <Circle cx="7" cy="20" r="4.5" fill="white" />
-        <Circle cx="38" cy="17" r="4.5" fill="white" />
-        <Path
-          d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z"
-          fill="white"
-        />
+        <Path d="M12 28 C12 22, 18 16, 24 20 C30 16, 36 22, 36 28 C36 36, 24 42, 24 42 C24 42, 12 36, 12 28Z" fill="white" />
       </Svg>
     </View>
   );
 }
 
+function formatPrice(pkg: PurchasesPackage): string {
+  return pkg.product.priceString;
+}
+
+function formatPeriod(pkg: PurchasesPackage): string {
+  const id = pkg.identifier;
+  if (id.includes('annual') || id === '$rc_annual') return 'Annual';
+  return 'Monthly';
+}
+
 export default function PremiumScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const setPremium = usePremiumStore((s) => s.setPremium);
-  const [selectedPlan, setSelectedPlan] = useState<Plan>('annual');
+  const { isPremium, packages, loading, fetchPackages, purchase, restore } = usePremiumStore();
+  const [selectedPkg, setSelectedPkg] = useState<PurchasesPackage | null>(null);
 
-  const handleSubscribe = () => {
-    // TODO: Replace with RevenueCat purchase flow
-    Alert.alert(
-      'Start Free Trial',
-      `You selected the ${selectedPlan} plan. In-app purchases will be available soon!`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Activate (Demo)',
-          onPress: () => {
-            setPremium(true);
-            router.back();
-          },
-        },
-      ]
-    );
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
+
+  // Auto-select annual package or first available
+  useEffect(() => {
+    if (packages.length > 0 && !selectedPkg) {
+      const annual = packages.find(
+        (p) => p.identifier.includes('annual') || p.identifier === '$rc_annual'
+      );
+      setSelectedPkg(annual ?? packages[0]);
+    }
+  }, [packages, selectedPkg]);
+
+  const handlePurchase = async () => {
+    if (!selectedPkg) return;
+    try {
+      const success = await purchase(selectedPkg);
+      if (success) {
+        Alert.alert('Welcome to Pro!', 'You now have access to all premium features.', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+      }
+    } catch (err: any) {
+      Alert.alert('Purchase Failed', err?.message ?? 'Something went wrong. Please try again.');
+    }
   };
+
+  const handleRestore = async () => {
+    const restored = await restore();
+    if (restored) {
+      Alert.alert('Restored!', 'Your Pro subscription has been restored.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } else {
+      Alert.alert('No Purchases Found', 'We could not find any previous subscriptions.');
+    }
+  };
+
+  if (isPremium) {
+    return (
+      <View style={[styles.root, { justifyContent: 'center', alignItems: 'center', padding: Spacing.xl }]}>
+        <StatusBar style="dark" />
+        <Crown size={48} color={Colors.terracotta} />
+        <Text style={[styles.heroTitle, { color: Colors.textPrimary, marginTop: Spacing.md }]}>
+          You're a Pro!
+        </Text>
+        <Text style={[styles.heroSubtitle, { color: Colors.textSecondary }]}>
+          You have access to all premium features.
+        </Text>
+        <Pressable style={[styles.ctaButton, { marginTop: Spacing.xl }]} onPress={() => router.back()}>
+          <Text style={styles.ctaButtonText}>Done</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -161,16 +175,9 @@ export default function PremiumScreen() {
         {/* Hero */}
         <View style={[styles.hero, { paddingTop: Spacing.lg }]}>
           <PawDecorations />
-
-          {/* Close button */}
-          <Pressable
-            onPress={() => router.back()}
-            style={styles.closeButton}
-            hitSlop={12}
-          >
+          <Pressable onPress={() => router.back()} style={styles.closeButton} hitSlop={12}>
             <X size={24} color="rgba(255,255,255,0.8)" />
           </Pressable>
-
           <View style={styles.crownContainer}>
             <Crown size={40} color={Colors.warmWhite} />
           </View>
@@ -186,9 +193,7 @@ export default function PremiumScreen() {
             const Icon = feature.icon;
             return (
               <View key={feature.title} style={styles.featureRow}>
-                <View
-                  style={[styles.featureIcon, { backgroundColor: feature.bgColor }]}
-                >
+                <View style={[styles.featureIcon, { backgroundColor: feature.bgColor }]}>
                   <Icon size={20} color={feature.color} />
                 </View>
                 <View style={styles.featureText}>
@@ -202,57 +207,79 @@ export default function PremiumScreen() {
 
         {/* Plans */}
         <View style={styles.plansSection}>
-          {/* Annual */}
-          <Pressable
-            style={[
-              styles.planCard,
-              selectedPlan === 'annual' && styles.planCardSelected,
-            ]}
-            onPress={() => setSelectedPlan('annual')}
-          >
-            <View style={styles.planBadge}>
-              <Text style={styles.planBadgeText}>SAVE 30%</Text>
-            </View>
-            <View style={styles.planRadio}>
-              {selectedPlan === 'annual' && (
-                <View style={styles.planRadioInner} />
-              )}
-            </View>
-            <View style={styles.planInfo}>
-              <Text style={styles.planName}>Annual</Text>
-              <Text style={styles.planPrice}>$49.99/yr</Text>
-              <Text style={styles.planPriceNote}>$4.17/month</Text>
-            </View>
-          </Pressable>
+          {packages.length > 0 ? (
+            packages.map((pkg) => {
+              const isAnnual = pkg.identifier.includes('annual') || pkg.identifier === '$rc_annual';
+              const isSelected = selectedPkg?.identifier === pkg.identifier;
 
-          {/* Monthly */}
-          <Pressable
-            style={[
-              styles.planCard,
-              selectedPlan === 'monthly' && styles.planCardSelected,
-            ]}
-            onPress={() => setSelectedPlan('monthly')}
-          >
-            <View style={styles.planRadio}>
-              {selectedPlan === 'monthly' && (
-                <View style={styles.planRadioInner} />
-              )}
-            </View>
-            <View style={styles.planInfo}>
-              <Text style={styles.planName}>Monthly</Text>
-              <Text style={styles.planPrice}>$5.99/mo</Text>
-            </View>
-          </Pressable>
+              return (
+                <Pressable
+                  key={pkg.identifier}
+                  style={[styles.planCard, isSelected && styles.planCardSelected]}
+                  onPress={() => setSelectedPkg(pkg)}
+                >
+                  {isAnnual && (
+                    <View style={styles.planBadge}>
+                      <Text style={styles.planBadgeText}>SAVE 30%</Text>
+                    </View>
+                  )}
+                  <View style={styles.planRadio}>
+                    {isSelected && <View style={styles.planRadioInner} />}
+                  </View>
+                  <View style={styles.planInfo}>
+                    <Text style={styles.planName}>{formatPeriod(pkg)}</Text>
+                    <Text style={styles.planPrice}>{formatPrice(pkg)}</Text>
+                  </View>
+                </Pressable>
+              );
+            })
+          ) : (
+            /* Fallback when packages haven't loaded (Expo Go / no products configured) */
+            <>
+              <Pressable
+                style={[styles.planCard, styles.planCardSelected]}
+                onPress={() => {}}
+              >
+                <View style={styles.planBadge}>
+                  <Text style={styles.planBadgeText}>SAVE 30%</Text>
+                </View>
+                <View style={styles.planRadio}>
+                  <View style={styles.planRadioInner} />
+                </View>
+                <View style={styles.planInfo}>
+                  <Text style={styles.planName}>Annual</Text>
+                  <Text style={styles.planPrice}>$49.99/yr</Text>
+                  <Text style={styles.planPriceNote}>$4.17/month</Text>
+                </View>
+              </Pressable>
+              <Pressable style={styles.planCard} onPress={() => {}}>
+                <View style={styles.planRadio} />
+                <View style={styles.planInfo}>
+                  <Text style={styles.planName}>Monthly</Text>
+                  <Text style={styles.planPrice}>$5.99/mo</Text>
+                </View>
+              </Pressable>
+            </>
+          )}
         </View>
 
         {/* CTA */}
         <View style={styles.ctaSection}>
-          <Pressable style={styles.ctaButton} onPress={handleSubscribe}>
-            <Text style={styles.ctaButtonText}>Start 7-Day Free Trial</Text>
+          <Pressable
+            style={[styles.ctaButton, loading && { opacity: 0.7 }]}
+            onPress={handlePurchase}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.warmWhite} />
+            ) : (
+              <Text style={styles.ctaButtonText}>Start 7-Day Free Trial</Text>
+            )}
           </Pressable>
-          <Text style={styles.ctaNote}>
-            Cancel anytime. No charge until trial ends.
-          </Text>
+          <Text style={styles.ctaNote}>Cancel anytime. No charge until trial ends.</Text>
+          <Pressable onPress={handleRestore} disabled={loading}>
+            <Text style={styles.restoreText}>Restore Purchases</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -315,6 +342,11 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     padding: Spacing.lg,
     gap: 20,
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   featureRow: {
     flexDirection: 'row',
@@ -328,9 +360,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featureText: {
-    flex: 1,
-  },
+  featureText: { flex: 1 },
   featureTitle: {
     fontSize: 15,
     fontWeight: '700',
@@ -355,6 +385,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.border,
     gap: 14,
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   planCardSelected: {
     borderColor: Colors.terracotta,
@@ -390,9 +425,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: Colors.terracotta,
   },
-  planInfo: {
-    flex: 1,
-  },
+  planInfo: { flex: 1 },
   planName: {
     fontSize: 16,
     fontWeight: '700',
@@ -420,6 +453,11 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderRadius: Radius.md,
     alignItems: 'center',
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 4,
   },
   ctaButtonText: {
     fontSize: 17,
@@ -429,5 +467,11 @@ const styles = StyleSheet.create({
   ctaNote: {
     fontSize: 13,
     color: Colors.textTertiary,
+  },
+  restoreText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.terracotta,
+    marginTop: 4,
   },
 });

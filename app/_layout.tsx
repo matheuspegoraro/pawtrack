@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '@/stores/auth';
+import { usePremiumStore } from '@/stores/premium';
 import { registerForPushNotifications, addNotificationResponseListener } from '@/lib/notifications';
 import 'react-native-reanimated';
 
@@ -14,14 +15,14 @@ export default function RootLayout() {
     initialize();
   }, [initialize]);
 
-  // Register push token when session is available
+  // Initialize RevenueCat + push when session is available
+  const initPremium = usePremiumStore((s) => s.initialize);
   useEffect(() => {
     if (session) {
-      registerForPushNotifications().catch(() => {
-        // Silently fail — push not available in Expo Go
-      });
+      initPremium(session.user.id).catch(() => {});
+      registerForPushNotifications().catch(() => {});
     }
-  }, [session]);
+  }, [session, initPremium]);
 
   // Deep link: tap notification → open Alerts
   useEffect(() => {
