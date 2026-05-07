@@ -1,19 +1,52 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  Switch,
+  Alert,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { User, Bell, Crown, Share2, CircleHelp, LogOut } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import {
+  User,
+  Bell,
+  Crown,
+  CircleHelp,
+  Shield,
+  FileText,
+  LogOut,
+  ChevronRight,
+} from 'lucide-react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
-
-const MENU_ITEMS = [
-  { icon: User, label: 'Account', color: Colors.terracotta },
-  { icon: Bell, label: 'Notifications', color: Colors.amber },
-  { icon: Crown, label: 'PawTrack Pro', color: Colors.plum },
-  { icon: Share2, label: 'Share & Invite', color: Colors.sage },
-  { icon: CircleHelp, label: 'Help & Support', color: Colors.textSecondary },
-];
+import { useAuthStore } from '@/stores/auth';
+import { usePremiumStore } from '@/stores/premium';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const { user, signOut } = useAuthStore();
+  const isPremium = usePremiumStore((s) => s.isPremium);
+
+  const [pushNotifications, setPushNotifications] = useState(true);
+
+  const userName =
+    user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const userEmail = user?.email || '';
+
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: () => signOut(),
+      },
+    ]);
+  };
 
   return (
     <View style={styles.root}>
@@ -22,36 +55,206 @@ export default function SettingsScreen() {
         <Text style={styles.title}>Settings</Text>
       </View>
 
-      <View style={styles.menu}>
-        {MENU_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Pressable key={item.label} style={styles.menuItem}>
-              <Icon size={20} color={item.color} />
-              <Text style={styles.menuLabel}>{item.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* User Info Card */}
+        <View style={styles.userCard}>
+          <View style={styles.userAvatar}>
+            <Text style={styles.userAvatarText}>
+              {userName.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{userName}</Text>
+            <Text style={styles.userEmail}>{userEmail}</Text>
+          </View>
+        </View>
 
-      <Pressable style={styles.logoutBtn}>
-        <LogOut size={18} color={Colors.coral} />
-        <Text style={styles.logoutText}>Sign Out</Text>
-      </Pressable>
+        {/* Account Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          <View style={styles.menuGroup}>
+            <Pressable style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: Colors.terracottaLight }]}>
+                <User size={18} color={Colors.terracotta} />
+              </View>
+              <Text style={styles.menuLabel}>Edit Profile</Text>
+              <ChevronRight size={18} color={Colors.textTertiary} />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          <View style={styles.menuGroup}>
+            <View style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: Colors.amberLight }]}>
+                <Bell size={18} color={Colors.amber} />
+              </View>
+              <Text style={[styles.menuLabel, { flex: 1 }]}>Push Notifications</Text>
+              <Switch
+                value={pushNotifications}
+                onValueChange={setPushNotifications}
+                trackColor={{
+                  false: Colors.border,
+                  true: Colors.terracottaLight,
+                }}
+                thumbColor={pushNotifications ? Colors.terracotta : Colors.textTertiary}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Subscription Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Subscription</Text>
+          <View style={styles.menuGroup}>
+            <Pressable
+              style={styles.menuItem}
+              onPress={() => router.push('/premium')}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: Colors.plumLight }]}>
+                <Crown size={18} color={Colors.plum} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.menuLabel}>PawTrack Pro</Text>
+                <Text style={styles.menuSublabel}>
+                  {isPremium ? 'Active' : 'Free plan'}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.statusBadge,
+                  isPremium ? styles.statusBadgePro : styles.statusBadgeFree,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    isPremium
+                      ? styles.statusBadgeTextPro
+                      : styles.statusBadgeTextFree,
+                  ]}
+                >
+                  {isPremium ? 'PRO' : 'FREE'}
+                </Text>
+              </View>
+              <ChevronRight size={18} color={Colors.textTertiary} />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Support Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Support</Text>
+          <View style={styles.menuGroup}>
+            <Pressable style={[styles.menuItem, styles.menuItemBorder]}>
+              <View style={[styles.menuIcon, { backgroundColor: Colors.sageLight }]}>
+                <CircleHelp size={18} color={Colors.sage} />
+              </View>
+              <Text style={styles.menuLabel}>Help</Text>
+              <ChevronRight size={18} color={Colors.textTertiary} />
+            </Pressable>
+
+            <Pressable style={[styles.menuItem, styles.menuItemBorder]}>
+              <View style={[styles.menuIcon, { backgroundColor: Colors.sand }]}>
+                <Shield size={18} color={Colors.textSecondary} />
+              </View>
+              <Text style={styles.menuLabel}>Privacy Policy</Text>
+              <ChevronRight size={18} color={Colors.textTertiary} />
+            </Pressable>
+
+            <Pressable style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: Colors.sand }]}>
+                <FileText size={18} color={Colors.textSecondary} />
+              </View>
+              <Text style={styles.menuLabel}>Terms of Service</Text>
+              <ChevronRight size={18} color={Colors.textTertiary} />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Sign Out */}
+        <Pressable style={styles.signOutButton} onPress={handleSignOut}>
+          <LogOut size={18} color={Colors.coral} />
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </Pressable>
+
+        {/* Version */}
+        <Text style={styles.versionText}>PawTrack v1.0.0</Text>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.sand },
+  root: {
+    flex: 1,
+    backgroundColor: Colors.sand,
+  },
   header: {
     backgroundColor: Colors.warmWhite,
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.lg,
   },
-  title: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary },
-  menu: {
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+  },
+  userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     margin: Spacing.lg,
+    marginBottom: Spacing.sm,
+    backgroundColor: Colors.warmWhite,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+  },
+  userAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.terracottaLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userAvatarText: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: Colors.terracotta,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  userEmail: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  section: {
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.xs,
+  },
+  menuGroup: {
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
     overflow: 'hidden',
@@ -59,22 +262,74 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    paddingVertical: 16,
-    paddingHorizontal: Spacing.lg,
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: Spacing.md,
+  },
+  menuItemBorder: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  menuLabel: { fontSize: 16, fontWeight: '500', color: Colors.textPrimary },
-  logoutBtn: {
+  menuIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: Radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  menuSublabel: {
+    fontSize: 12,
+    color: Colors.textTertiary,
+    marginTop: 1,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+    marginRight: 4,
+  },
+  statusBadgeFree: {
+    backgroundColor: Colors.sand,
+  },
+  statusBadgePro: {
+    backgroundColor: Colors.plumLight,
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  statusBadgeTextFree: {
+    color: Colors.textTertiary,
+  },
+  statusBadgeTextPro: {
+    color: Colors.plum,
+  },
+  signOutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: Spacing.sm,
     marginHorizontal: Spacing.lg,
-    padding: 16,
+    marginTop: Spacing.lg,
+    padding: Spacing.md,
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
   },
-  logoutText: { fontSize: 16, fontWeight: '600', color: Colors.coral },
+  signOutText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.coral,
+  },
+  versionText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: Colors.textTertiary,
+    marginTop: Spacing.md,
+  },
 });

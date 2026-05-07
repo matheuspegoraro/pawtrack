@@ -1,11 +1,34 @@
-import { View, Text, ScrollView, TextInput, StyleSheet, Pressable, Image } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { X, Syringe, Pill, Stethoscope, Weight, Camera, Check } from 'lucide-react-native';
+import {
+  X,
+  Syringe,
+  Pill,
+  Stethoscope,
+  Weight,
+  Camera,
+  Check,
+  AlertCircle,
+} from 'lucide-react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
-import { useState } from 'react';
-import type { RecordType } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import { format } from 'date-fns';
+import * as Haptics from 'expo-haptics';
+import { supabase } from '@/lib/supabase';
+import { scheduleLocalNotification } from '@/lib/notifications';
+import type { RecordType, Pet } from '@/types';
 
 const RECORD_TYPES: { type: RecordType; label: string; icon: typeof Syringe }[] = [
   { type: 'vaccine', label: 'Vaccine', icon: Syringe },
@@ -14,17 +37,120 @@ const RECORD_TYPES: { type: RecordType; label: string; icon: typeof Syringe }[] 
   { type: 'weight', label: 'Weight', icon: Weight },
 ];
 
-const PETS = [
-  { id: '1', name: 'Max', image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop&crop=face' },
-  { id: '2', name: 'Luna', image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop&crop=face' },
-  { id: '3', name: 'Buddy', image: 'https://images.unsplash.com/photo-1596854407944-bf87f6fcebc4?w=100&h=100&fit=crop&crop=face' },
-];
+const FIELD_LABELS: Record<RecordType, string> = {
+  vaccine: 'Vaccine name',
+  medication: 'Medication name',
+  vet_visit: 'Visit reason',
+  symptom: 'Symptom',
+  weight: 'Weight (lb)',
+};
 
 export default function AddRecordScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+
+  const [pets, setPets] = useState<Pet[]>([]);
   const [selectedType, setSelectedType] = useState<RecordType>('vaccine');
-  const [selectedPet, setSelectedPet] = useState('1');
+  const [selectedPetId, setSelectedPetId] = useState<string>('');
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [nextDueDate, setNextDueDate] = useState('');
+  const [vetName, setVetName] = useState('');
+  const [notes, setNotes] = useState('');
+  const [dosage, setDosage] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Fetch pets from Supabase
+  useEffect(() => {
+    async function fetchPets() {
+      const { data } = await supabase
+        .from('pets')
+        .select('*')
+        .order('name');
+
+      if (data && data.length > 0) {
+        setPets(data);
+        setSelectedPetId(data[0].id);
+      }
+    }
+    fetchPets();
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!selectedPetId) {
+      Alert.alert('Select a pet', 'Please select a pet for this record.');
+      return;
+    }
+    if (!title.trim()) {
+      Alert.alert('Title required', 'Please enter a title for this record.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Insert health record
+      const { data: record, error: recordError } = await supabase
+        .from('health_records')
+        .insert({
+          pet_id: selectedPetId,
+          type: selectedType,
+          title: title.trim(),
+          date,
+          next_due_date: nextDueDate || null,
+          description: notes.trim() || null,
+          vet_name: vetName.trim() || null,
+          dosage: dosage.trim() || null,
+        })
+        .select()
+        .single();
+
+      if (recordError) throw recordError;
+
+      // Auto-create reminder if next_due_date is set
+      if (nextDueDate && record) {
+        const remindAt = new Date(nextDueDate);
+        remindAt.setHours(9, 0, 0, 0); // Default to 9 AM
+
+        const pet = pets.find((p) => p.id === selectedPetId);
+        const reminderTitle = `${title.trim()} — ${pet?.name ?? 'Pet'}`;
+
+        const { error: reminderError } = await supabase
+          .from('reminders')
+          .insert({
+            pet_id: selectedPetId,
+            health_record_id: record.id,
+            title: reminderTitle,
+            remind_at: remindAt.toISOString(),
+            is_active: true,
+          });
+
+        if (reminderError) {
+          console.warn('Failed to create reminder:', reminderError);
+        } else {
+          // Schedule local notification
+          try {
+            await scheduleLocalNotification(
+              reminderTitle,
+              `Due: ${format(remindAt, 'MMM d, yyyy')}`,
+              remindAt
+            );
+          } catch {
+            // Notification scheduling is best-effort
+          }
+        }
+      }
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Saved', 'Health record saved successfully.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (err: any) {
+      console.error('Save failed:', err);
+      Alert.alert('Error', err?.message ?? 'Failed to save record. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }, [selectedPetId, selectedType, title, date, nextDueDate, notes, vetName, dosage, pets, router]);
 
   return (
     <View style={styles.root}>
@@ -49,10 +175,15 @@ export default function AddRecordScreen() {
               <Pressable
                 key={rt.type}
                 style={[styles.typeOption, active && styles.typeOptionActive]}
-                onPress={() => setSelectedType(rt.type)}
+                onPress={() => {
+                  setSelectedType(rt.type);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
               >
                 <Icon size={22} color={active ? Colors.terracotta : Colors.textTertiary} />
-                <Text style={[styles.typeLabel, active && { color: Colors.terracotta }]}>{rt.label}</Text>
+                <Text style={[styles.typeLabel, active && { color: Colors.terracotta }]}>
+                  {rt.label}
+                </Text>
               </Pressable>
             );
           })}
@@ -60,41 +191,118 @@ export default function AddRecordScreen() {
 
         {/* Pet selector */}
         <Text style={styles.label}>Pet</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: Spacing.lg }}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            {PETS.map((pet) => (
-              <Pressable
-                key={pet.id}
-                style={[styles.petPill, selectedPet === pet.id && styles.petPillActive]}
-                onPress={() => setSelectedPet(pet.id)}
-              >
-                <Image source={{ uri: pet.image }} style={styles.petImg} />
-                <Text style={styles.petLabel}>{pet.name}</Text>
-              </Pressable>
-            ))}
+        {pets.length === 0 ? (
+          <View style={styles.emptyPets}>
+            <AlertCircle size={16} color={Colors.textTertiary} />
+            <Text style={styles.emptyPetsText}>
+              No pets found. Add a pet first.
+            </Text>
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: Spacing.lg }}
+          >
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {pets.map((pet) => (
+                <Pressable
+                  key={pet.id}
+                  style={[styles.petPill, selectedPetId === pet.id && styles.petPillActive]}
+                  onPress={() => setSelectedPetId(pet.id)}
+                >
+                  {pet.photo_url ? (
+                    <Image source={{ uri: pet.photo_url }} style={styles.petImg} />
+                  ) : (
+                    <View style={[styles.petImg, styles.petImgPlaceholder]}>
+                      <Text style={styles.petInitial}>
+                        {pet.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={styles.petLabel}>{pet.name}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
+        )}
 
         {/* Fields */}
-        <Text style={styles.label}>Vaccine name</Text>
-        <TextInput style={styles.input} placeholder="e.g. Rabies, DHPP, Bordetella..." placeholderTextColor={Colors.textTertiary} />
+        <Text style={styles.label}>{FIELD_LABELS[selectedType]}</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={
+            selectedType === 'vaccine'
+              ? 'e.g. Rabies, DHPP, Bordetella...'
+              : selectedType === 'medication'
+              ? 'e.g. Heartworm pill, Flea treatment...'
+              : selectedType === 'weight'
+              ? 'e.g. 45'
+              : 'Enter title...'
+          }
+          placeholderTextColor={Colors.textTertiary}
+          value={title}
+          onChangeText={setTitle}
+        />
 
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Date given</Text>
-            <TextInput style={styles.input} value="May 6, 2026" placeholderTextColor={Colors.textTertiary} />
+            <Text style={styles.label}>Date</Text>
+            <TextInput
+              style={styles.input}
+              value={date}
+              onChangeText={setDate}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor={Colors.textTertiary}
+            />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.label}>Next due</Text>
-            <TextInput style={styles.input} placeholder="Auto-calculated" placeholderTextColor={Colors.textTertiary} />
+            <TextInput
+              style={styles.input}
+              value={nextDueDate}
+              onChangeText={setNextDueDate}
+              placeholder="YYYY-MM-DD"
+              placeholderTextColor={Colors.textTertiary}
+            />
           </View>
         </View>
 
-        <Text style={styles.label}>Veterinarian</Text>
-        <TextInput style={styles.input} placeholder="Dr. name or clinic" placeholderTextColor={Colors.textTertiary} />
+        {(selectedType === 'medication') && (
+          <>
+            <Text style={styles.label}>Dosage</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 50mg daily"
+              placeholderTextColor={Colors.textTertiary}
+              value={dosage}
+              onChangeText={setDosage}
+            />
+          </>
+        )}
+
+        {(selectedType === 'vaccine' || selectedType === 'vet_visit') && (
+          <>
+            <Text style={styles.label}>Veterinarian</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Dr. name or clinic"
+              placeholderTextColor={Colors.textTertiary}
+              value={vetName}
+              onChangeText={setVetName}
+            />
+          </>
+        )}
 
         <Text style={styles.label}>Notes</Text>
-        <TextInput style={[styles.input, styles.textarea]} placeholder="Any additional notes..." placeholderTextColor={Colors.textTertiary} multiline />
+        <TextInput
+          style={[styles.input, styles.textarea]}
+          placeholder="Any additional notes..."
+          placeholderTextColor={Colors.textTertiary}
+          multiline
+          value={notes}
+          onChangeText={setNotes}
+        />
 
         <Pressable style={styles.uploadBtn}>
           <Camera size={18} color={Colors.textTertiary} />
@@ -103,9 +311,19 @@ export default function AddRecordScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-        <Pressable style={styles.saveBtn}>
-          <Check size={18} color="white" />
-          <Text style={styles.saveBtnText}>Save Record</Text>
+        <Pressable
+          style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Check size={18} color="white" />
+          )}
+          <Text style={styles.saveBtnText}>
+            {saving ? 'Saving...' : 'Save Record'}
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -168,7 +386,23 @@ const styles = StyleSheet.create({
   },
   petPillActive: { borderColor: Colors.terracotta, backgroundColor: Colors.terracottaLight },
   petImg: { width: 26, height: 26, borderRadius: 13 },
+  petImgPlaceholder: {
+    backgroundColor: Colors.terracottaLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  petInitial: { fontSize: 12, fontWeight: '700', color: Colors.terracotta },
   petLabel: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary },
+  emptyPets: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 14,
+    backgroundColor: Colors.sand,
+    borderRadius: Radius.sm,
+    marginBottom: Spacing.lg,
+  },
+  emptyPetsText: { fontSize: 13, color: Colors.textTertiary },
   input: {
     backgroundColor: Colors.sand,
     borderWidth: 2,
@@ -204,5 +438,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: Radius.md,
   },
+  saveBtnDisabled: { opacity: 0.7 },
   saveBtnText: { fontSize: 16, fontWeight: '700', color: 'white' },
 });
