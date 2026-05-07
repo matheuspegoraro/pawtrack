@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { differenceInYears } from 'date-fns';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Svg, { Ellipse } from 'react-native-svg';
 import {
   ChevronLeft,
   Ellipsis,
@@ -12,6 +14,8 @@ import {
   Stethoscope,
   Weight,
   CircleCheckBig,
+  ClipboardList,
+  Plus,
 } from 'lucide-react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { usePets } from '@/hooks/usePets';
@@ -39,6 +43,18 @@ const FILTERS: { key: FilterType; label: string }[] = [
   { key: 'vet_visit', label: 'Visits' },
   { key: 'weight', label: 'Weight' },
 ];
+
+function PawSvg({ size = 20, color = Colors.terracotta }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Ellipse cx="35" cy="22" rx="13" ry="15" fill={color} rotation={-12} origin="35,22" />
+      <Ellipse cx="65" cy="22" rx="13" ry="15" fill={color} rotation={12} origin="65,22" />
+      <Ellipse cx="20" cy="50" rx="11" ry="13" fill={color} rotation={-25} origin="20,50" />
+      <Ellipse cx="80" cy="50" rx="11" ry="13" fill={color} rotation={25} origin="80,50" />
+      <Ellipse cx="50" cy="68" rx="24" ry="21" fill={color} />
+    </Svg>
+  );
+}
 
 function computeAge(birthDate: string | null): string {
   if (!birthDate) return '--';
@@ -84,6 +100,19 @@ export default function PetProfileScreen() {
       <ScrollView bounces={false}>
         {/* Hero */}
         <View style={[styles.hero, { paddingTop: insets.top + Spacing.sm }]}>
+          {/* Decorative paw prints */}
+          <View style={styles.heroDecoration}>
+            <View style={{ opacity: 0.06, position: 'absolute', top: -10, right: -5 }}>
+              <PawSvg size={80} color="#FFFFFF" />
+            </View>
+            <View style={{ opacity: 0.04, position: 'absolute', top: 50, right: 55 }}>
+              <PawSvg size={40} color="#FFFFFF" />
+            </View>
+            <View style={{ opacity: 0.05, position: 'absolute', bottom: 20, left: -10 }}>
+              <PawSvg size={50} color="#FFFFFF" />
+            </View>
+          </View>
+
           {/* Nav row */}
           <View style={styles.heroNav}>
             <Pressable onPress={() => router.back()} style={styles.heroBtn}>
@@ -113,7 +142,7 @@ export default function PetProfileScreen() {
           </View>
 
           {/* Stats row */}
-          <View style={styles.statsRow}>
+          <Animated.View entering={FadeInUp.duration(500).delay(200)} style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{age}</Text>
               <Text style={styles.statLabel}>Age</Text>
@@ -136,34 +165,42 @@ export default function PetProfileScreen() {
               </View>
               <Text style={styles.statLabel}>Status</Text>
             </View>
-          </View>
+          </Animated.View>
         </View>
 
         {/* Filter pills */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterRow}
-        >
-          {FILTERS.map((f) => {
-            const active = filter === f.key;
-            return (
-              <Pressable
-                key={f.key}
-                style={[styles.filterPill, active && styles.filterPillActive]}
-                onPress={() => setFilter(f.key)}
-              >
-                <Text style={[styles.filterText, active && styles.filterTextActive]}>
-                  {f.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <Animated.View entering={FadeInUp.duration(400).delay(300)}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            {FILTERS.map((f) => {
+              const active = filter === f.key;
+              return (
+                <Pressable
+                  key={f.key}
+                  style={[
+                    styles.filterPill,
+                    active && styles.filterPillActive,
+                    active && styles.filterPillActiveShadow,
+                  ]}
+                  onPress={() => setFilter(f.key)}
+                >
+                  <Text style={[styles.filterText, active && styles.filterTextActive]}>
+                    {f.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
 
         {/* Timeline */}
         <View style={styles.timelineSection}>
-          <Text style={styles.timelineTitle}>Health Timeline</Text>
+          <Animated.Text entering={FadeInDown.duration(400).delay(350)} style={styles.timelineTitle}>
+            Health Timeline
+          </Animated.Text>
 
           {recordsLoading ? (
             <ActivityIndicator
@@ -172,36 +209,79 @@ export default function PetProfileScreen() {
               style={{ marginTop: Spacing.lg }}
             />
           ) : records.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No records yet</Text>
+            <Animated.View entering={FadeInDown.duration(500).delay(400)} style={styles.emptyCard}>
+              <View style={styles.emptyIconCircle}>
+                <ClipboardList size={28} color={Colors.terracotta} />
+              </View>
+              <Text style={styles.emptyTitle}>No health records yet</Text>
               <Text style={styles.emptySubtext}>
-                Add health records to track {pet.name}'s wellbeing
+                Add your first record to start tracking {pet.name}'s wellbeing.
               </Text>
-            </View>
+            </Animated.View>
           ) : (
             records.map((record, index) => (
               <TimelineItem
                 key={record.id}
                 record={record}
                 isLast={index === records.length - 1}
+                delay={400 + index * 80}
               />
             ))
           )}
         </View>
+
+        {/* Bottom spacer for FAB */}
+        <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* Floating Add Record button */}
+      <Animated.View
+        entering={FadeInUp.duration(500).delay(600)}
+        style={[styles.fab, { bottom: Math.max(insets.bottom, 16) + 16 }]}
+      >
+        <Pressable
+          style={styles.fabButton}
+          onPress={() => {
+            // Navigate to add record for this pet
+            router.push(`/record/add?petId=${pet.id}`);
+          }}
+        >
+          <Plus size={24} color={Colors.white} />
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
 
-function TimelineItem({ record, isLast }: { record: HealthRecord; isLast: boolean }) {
+function TimelineItem({
+  record,
+  isLast,
+  delay,
+}: {
+  record: HealthRecord;
+  isLast: boolean;
+  delay: number;
+}) {
   const config = RECORD_CONFIG[record.type];
   const Icon = config.icon;
 
   return (
-    <View style={styles.timelineRow}>
+    <Animated.View entering={FadeInDown.duration(450).delay(delay)} style={styles.timelineRow}>
       {/* Left rail */}
       <View style={styles.timelineRail}>
-        <View style={[styles.timelineDot, { backgroundColor: config.color }]}>
+        <View
+          style={[
+            styles.timelineDot,
+            {
+              backgroundColor: config.color,
+              shadowColor: config.color,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.35,
+              shadowRadius: 6,
+              elevation: 4,
+            },
+          ]}
+        >
           <Icon size={12} color={Colors.white} />
         </View>
         {!isLast && <View style={styles.timelineLine} />}
@@ -233,9 +313,17 @@ function TimelineItem({ record, isLast }: { record: HealthRecord; isLast: boolea
           </View>
         ) : null}
       </View>
-    </View>
+    </Animated.View>
   );
 }
+
+const cardShadow = {
+  shadowColor: '#2A2017',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.03,
+  shadowRadius: 8,
+  elevation: 2,
+};
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.sand },
@@ -252,12 +340,18 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.lg,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
+    overflow: 'hidden',
+  },
+  heroDecoration: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
   },
   heroNav: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.md,
+    zIndex: 1,
   },
   heroBtn: {
     width: 40,
@@ -267,7 +361,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroCenter: { alignItems: 'center', marginBottom: Spacing.lg },
+  heroCenter: { alignItems: 'center', marginBottom: Spacing.lg, zIndex: 1 },
   photoContainer: {
     width: 96,
     height: 96,
@@ -293,9 +387,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     marginHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
     backgroundColor: 'rgba(0,0,0,0.12)',
     borderRadius: Radius.md,
+    zIndex: 1,
   },
   statItem: { alignItems: 'center', flex: 1 },
   statValue: { fontSize: 18, fontWeight: '800', color: Colors.white },
@@ -330,6 +426,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.terracottaLight,
     borderColor: Colors.terracotta,
   },
+  filterPillActiveShadow: {
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
+  },
   filterText: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary },
   filterTextActive: { color: Colors.terracotta },
 
@@ -341,9 +444,37 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
-  emptyState: { alignItems: 'center', paddingVertical: Spacing.xl },
-  emptyText: { fontSize: 16, fontWeight: '600', color: Colors.textSecondary },
-  emptySubtext: { fontSize: 13, color: Colors.textTertiary, marginTop: 4, textAlign: 'center' },
+
+  // Empty state
+  emptyCard: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.warmWhite,
+    borderRadius: Radius.md,
+    ...cardShadow,
+  },
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.terracottaLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  emptySubtext: {
+    fontSize: 13,
+    color: Colors.textTertiary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
 
   // Timeline row
   timelineRow: { flexDirection: 'row', marginBottom: Spacing.md },
@@ -367,6 +498,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
+    ...cardShadow,
   },
   timelineCardHeader: {
     flexDirection: 'row',
@@ -398,4 +530,23 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   timelineNextDueText: { fontSize: 11, fontWeight: '600', color: Colors.amber },
+
+  // Floating Action Button
+  fab: {
+    position: 'absolute',
+    right: Spacing.lg,
+  },
+  fabButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.terracotta,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
 });

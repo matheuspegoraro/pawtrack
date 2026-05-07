@@ -20,8 +20,10 @@ import {
   Weight,
   Camera,
   Check,
-  AlertCircle,
+  PawPrint,
+  Plus,
 } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
@@ -59,6 +61,7 @@ export default function AddRecordScreen() {
   const [notes, setNotes] = useState('');
   const [dosage, setDosage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Fetch pets from Supabase
   useEffect(() => {
@@ -152,6 +155,11 @@ export default function AddRecordScreen() {
     }
   }, [selectedPetId, selectedType, title, date, nextDueDate, notes, vetName, dosage, pets, router]);
 
+  const inputStyle = (field: string) => [
+    styles.input,
+    focusedField === field && styles.inputFocused,
+  ];
+
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
@@ -166,151 +174,184 @@ export default function AddRecordScreen() {
 
       <ScrollView style={styles.body} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Type selector */}
-        <Text style={styles.label}>Record type</Text>
-        <View style={styles.typeGrid}>
-          {RECORD_TYPES.map((rt) => {
-            const Icon = rt.icon;
-            const active = selectedType === rt.type;
-            return (
-              <Pressable
-                key={rt.type}
-                style={[styles.typeOption, active && styles.typeOptionActive]}
-                onPress={() => {
-                  setSelectedType(rt.type);
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }}
-              >
-                <Icon size={22} color={active ? Colors.terracotta : Colors.textTertiary} />
-                <Text style={[styles.typeLabel, active && { color: Colors.terracotta }]}>
-                  {rt.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+          <Text style={styles.label}>Record type</Text>
+          <View style={styles.typeGrid}>
+            {RECORD_TYPES.map((rt) => {
+              const Icon = rt.icon;
+              const active = selectedType === rt.type;
+              return (
+                <Pressable
+                  key={rt.type}
+                  style={[styles.typeOption, active && styles.typeOptionActive]}
+                  onPress={() => {
+                    setSelectedType(rt.type);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                >
+                  <Icon size={22} color={active ? Colors.terracotta : Colors.textTertiary} />
+                  <Text style={[styles.typeLabel, active && { color: Colors.terracotta }]}>
+                    {rt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Animated.View>
 
         {/* Pet selector */}
-        <Text style={styles.label}>Pet</Text>
-        {pets.length === 0 ? (
-          <View style={styles.emptyPets}>
-            <AlertCircle size={16} color={Colors.textTertiary} />
-            <Text style={styles.emptyPetsText}>
-              No pets found. Add a pet first.
-            </Text>
-          </View>
-        ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: Spacing.lg }}
-          >
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {pets.map((pet) => (
-                <Pressable
-                  key={pet.id}
-                  style={[styles.petPill, selectedPetId === pet.id && styles.petPillActive]}
-                  onPress={() => setSelectedPetId(pet.id)}
-                >
-                  {pet.photo_url ? (
-                    <Image source={{ uri: pet.photo_url }} style={styles.petImg} />
-                  ) : (
-                    <View style={[styles.petImg, styles.petImgPlaceholder]}>
-                      <Text style={styles.petInitial}>
-                        {pet.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                  )}
-                  <Text style={styles.petLabel}>{pet.name}</Text>
-                </Pressable>
-              ))}
+        <Animated.View entering={FadeInDown.duration(400).delay(200)}>
+          <Text style={styles.label}>Pet</Text>
+          {pets.length === 0 ? (
+            <View style={styles.emptyPets}>
+              <View style={styles.emptyPetsIcon}>
+                <PawPrint size={24} color={Colors.terracotta} />
+              </View>
+              <Text style={styles.emptyPetsTitle}>No pets yet</Text>
+              <Text style={styles.emptyPetsText}>
+                Add a pet first to start tracking their health records.
+              </Text>
+              <Pressable
+                style={styles.emptyPetsBtn}
+                onPress={() => router.push('/pet/add')}
+              >
+                <Plus size={16} color={Colors.warmWhite} />
+                <Text style={styles.emptyPetsBtnText}>Add a Pet</Text>
+              </Pressable>
             </View>
-          </ScrollView>
-        )}
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginBottom: Spacing.lg }}
+            >
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {pets.map((pet) => (
+                  <Pressable
+                    key={pet.id}
+                    style={[styles.petPill, selectedPetId === pet.id && styles.petPillActive]}
+                    onPress={() => setSelectedPetId(pet.id)}
+                  >
+                    {pet.photo_url ? (
+                      <Image source={{ uri: pet.photo_url }} style={styles.petImg} />
+                    ) : (
+                      <View style={[styles.petImg, styles.petImgPlaceholder]}>
+                        <Text style={styles.petInitial}>
+                          {pet.name.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                    <Text style={styles.petLabel}>{pet.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
+          )}
+        </Animated.View>
 
         {/* Fields */}
-        <Text style={styles.label}>{FIELD_LABELS[selectedType]}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder={
-            selectedType === 'vaccine'
-              ? 'e.g. Rabies, DHPP, Bordetella...'
-              : selectedType === 'medication'
-              ? 'e.g. Heartworm pill, Flea treatment...'
-              : selectedType === 'weight'
-              ? 'e.g. 45'
-              : 'Enter title...'
-          }
-          placeholderTextColor={Colors.textTertiary}
-          value={title}
-          onChangeText={setTitle}
-        />
+        <Animated.View entering={FadeInDown.duration(400).delay(300)}>
+          <Text style={styles.label}>{FIELD_LABELS[selectedType]}</Text>
+          <TextInput
+            style={inputStyle('title')}
+            placeholder={
+              selectedType === 'vaccine'
+                ? 'e.g. Rabies, DHPP, Bordetella...'
+                : selectedType === 'medication'
+                ? 'e.g. Heartworm pill, Flea treatment...'
+                : selectedType === 'weight'
+                ? 'e.g. 45'
+                : 'Enter title...'
+            }
+            placeholderTextColor={Colors.textTertiary}
+            value={title}
+            onChangeText={setTitle}
+            onFocus={() => setFocusedField('title')}
+            onBlur={() => setFocusedField(null)}
+          />
 
-        <View style={styles.row}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Date</Text>
-            <TextInput
-              style={styles.input}
-              value={date}
-              onChangeText={setDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={Colors.textTertiary}
-            />
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Date</Text>
+              <TextInput
+                style={inputStyle('date')}
+                value={date}
+                onChangeText={setDate}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={Colors.textTertiary}
+                onFocus={() => setFocusedField('date')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Next due</Text>
+              <TextInput
+                style={inputStyle('nextDue')}
+                value={nextDueDate}
+                onChangeText={setNextDueDate}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={Colors.textTertiary}
+                onFocus={() => setFocusedField('nextDue')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Next due</Text>
-            <TextInput
-              style={styles.input}
-              value={nextDueDate}
-              onChangeText={setNextDueDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={Colors.textTertiary}
-            />
-          </View>
-        </View>
+        </Animated.View>
 
-        {(selectedType === 'medication') && (
-          <>
-            <Text style={styles.label}>Dosage</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. 50mg daily"
-              placeholderTextColor={Colors.textTertiary}
-              value={dosage}
-              onChangeText={setDosage}
-            />
-          </>
-        )}
+        <Animated.View entering={FadeInDown.duration(400).delay(400)}>
+          {(selectedType === 'medication') && (
+            <>
+              <Text style={styles.label}>Dosage</Text>
+              <TextInput
+                style={inputStyle('dosage')}
+                placeholder="e.g. 50mg daily"
+                placeholderTextColor={Colors.textTertiary}
+                value={dosage}
+                onChangeText={setDosage}
+                onFocus={() => setFocusedField('dosage')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </>
+          )}
 
-        {(selectedType === 'vaccine' || selectedType === 'vet_visit') && (
-          <>
-            <Text style={styles.label}>Veterinarian</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Dr. name or clinic"
-              placeholderTextColor={Colors.textTertiary}
-              value={vetName}
-              onChangeText={setVetName}
-            />
-          </>
-        )}
+          {(selectedType === 'vaccine' || selectedType === 'vet_visit') && (
+            <>
+              <Text style={styles.label}>Veterinarian</Text>
+              <TextInput
+                style={inputStyle('vet')}
+                placeholder="Dr. name or clinic"
+                placeholderTextColor={Colors.textTertiary}
+                value={vetName}
+                onChangeText={setVetName}
+                onFocus={() => setFocusedField('vet')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </>
+          )}
 
-        <Text style={styles.label}>Notes</Text>
-        <TextInput
-          style={[styles.input, styles.textarea]}
-          placeholder="Any additional notes..."
-          placeholderTextColor={Colors.textTertiary}
-          multiline
-          value={notes}
-          onChangeText={setNotes}
-        />
+          <Text style={styles.label}>Notes</Text>
+          <TextInput
+            style={[...inputStyle('notes'), styles.textarea]}
+            placeholder="Any additional notes..."
+            placeholderTextColor={Colors.textTertiary}
+            multiline
+            value={notes}
+            onChangeText={setNotes}
+            onFocus={() => setFocusedField('notes')}
+            onBlur={() => setFocusedField(null)}
+          />
 
-        <Pressable style={styles.uploadBtn}>
-          <Camera size={18} color={Colors.textTertiary} />
-          <Text style={styles.uploadText}>Add photo of document</Text>
-        </Pressable>
+          <Pressable style={styles.uploadBtn}>
+            <Camera size={18} color={Colors.textTertiary} />
+            <Text style={styles.uploadText}>Add photo of document</Text>
+          </Pressable>
+        </Animated.View>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <Animated.View
+        entering={FadeInDown.duration(400).delay(500)}
+        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}
+      >
         <Pressable
           style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
           onPress={handleSave}
@@ -325,20 +366,29 @@ export default function AddRecordScreen() {
             {saving ? 'Saving...' : 'Save Record'}
           </Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.warmWhite },
+  root: { flex: 1, backgroundColor: Colors.sand },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
-    paddingBottom: 12,
+    paddingBottom: 16,
     backgroundColor: Colors.warmWhite,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 6,
+    marginBottom: -4,
+    zIndex: 10,
   },
   closeBtn: {
     width: 32,
@@ -349,7 +399,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   topTitle: { fontSize: 20, fontWeight: '800', color: Colors.textPrimary },
-  body: { flex: 1, paddingHorizontal: Spacing.lg },
+  body: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm },
   label: {
     fontSize: 13,
     fontWeight: '600',
@@ -366,6 +416,12 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     borderWidth: 2,
     borderColor: Colors.border,
+    backgroundColor: Colors.warmWhite,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   typeOptionActive: {
     borderColor: Colors.terracotta,
@@ -382,7 +438,12 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 2,
     borderColor: 'transparent',
-    backgroundColor: Colors.sand,
+    backgroundColor: Colors.warmWhite,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
   petPillActive: { borderColor: Colors.terracotta, backgroundColor: Colors.terracottaLight },
   petImg: { width: 26, height: 26, borderRadius: 13 },
@@ -394,17 +455,54 @@ const styles = StyleSheet.create({
   petInitial: { fontSize: 12, fontWeight: '700', color: Colors.terracotta },
   petLabel: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary },
   emptyPets: {
+    alignItems: 'center',
+    padding: Spacing.lg,
+    backgroundColor: Colors.warmWhite,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.lg,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  emptyPetsIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.terracottaLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  emptyPetsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  emptyPetsText: {
+    fontSize: 13,
+    color: Colors.textTertiary,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  emptyPetsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 14,
-    backgroundColor: Colors.sand,
-    borderRadius: Radius.sm,
-    marginBottom: Spacing.lg,
+    gap: 6,
+    backgroundColor: Colors.terracotta,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
   },
-  emptyPetsText: { fontSize: 13, color: Colors.textTertiary },
+  emptyPetsBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.warmWhite,
+  },
   input: {
-    backgroundColor: Colors.sand,
+    backgroundColor: Colors.warmWhite,
     borderWidth: 2,
     borderColor: Colors.border,
     borderRadius: Radius.sm,
@@ -413,6 +511,14 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
+  inputFocused: {
+    borderColor: Colors.terracotta,
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
   textarea: { minHeight: 72, textAlignVertical: 'top' },
   row: { flexDirection: 'row', gap: 10 },
   uploadBtn: {
@@ -420,15 +526,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    padding: 14,
+    padding: 16,
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: Colors.border,
     borderRadius: Radius.sm,
     marginTop: Spacing.sm,
+    backgroundColor: Colors.warmWhite,
   },
   uploadText: { fontSize: 14, fontWeight: '600', color: Colors.textTertiary },
-  footer: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
+  footer: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+    backgroundColor: Colors.sand,
+  },
   saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -437,6 +548,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.terracotta,
     padding: 16,
     borderRadius: Radius.md,
+    shadowColor: Colors.terracottaDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveBtnDisabled: { opacity: 0.7 },
   saveBtnText: { fontSize: 16, fontWeight: '700', color: 'white' },

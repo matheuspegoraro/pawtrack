@@ -16,7 +16,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { X, Camera, Check, ChevronDown } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { X, Check, ChevronDown, PawPrint } from 'lucide-react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { usePets } from '@/hooks/usePets';
@@ -24,11 +25,19 @@ import { usePets } from '@/hooks/usePets';
 type Species = 'dog' | 'cat' | 'bird' | 'other';
 
 const SPECIES_OPTIONS: { value: Species; label: string; emoji: string }[] = [
-  { value: 'dog', label: 'Dog', emoji: '🐕' },
-  { value: 'cat', label: 'Cat', emoji: '🐈' },
-  { value: 'bird', label: 'Bird', emoji: '🐦' },
-  { value: 'other', label: 'Other', emoji: '🐾' },
+  { value: 'dog', label: 'Dog', emoji: '\u{1F415}' },
+  { value: 'cat', label: 'Cat', emoji: '\u{1F408}' },
+  { value: 'bird', label: 'Bird', emoji: '\u{1F426}' },
+  { value: 'other', label: 'Other', emoji: '\u{1F43E}' },
 ];
+
+const cardShadow = {
+  shadowColor: '#2A2017',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.03,
+  shadowRadius: 8,
+  elevation: 2,
+};
 
 export default function AddPetScreen() {
   const insets = useSafeAreaInsets();
@@ -47,6 +56,7 @@ export default function AddPetScreen() {
   const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [showSpeciesPicker, setShowSpeciesPicker] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Pre-fill when editing
   useEffect(() => {
@@ -151,6 +161,11 @@ export default function AddPetScreen() {
   const selectedSpecies = SPECIES_OPTIONS.find((s) => s.value === species)!;
   const displayPhoto = photoUri ?? existingPhotoUrl;
 
+  const inputStyle = (field: string) => [
+    styles.input,
+    focusedField === field && styles.inputFocused,
+  ];
+
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
@@ -174,112 +189,138 @@ export default function AddPetScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Photo picker */}
-          <View style={styles.photoSection}>
+          <Animated.View entering={FadeInDown.duration(400).delay(100)} style={styles.photoSection}>
             <Pressable onPress={pickImage} style={styles.photoPickerBtn}>
               {displayPhoto ? (
                 <Image source={{ uri: displayPhoto }} style={styles.photoPreview} contentFit="cover" />
               ) : (
                 <View style={styles.photoPlaceholder}>
-                  <Camera size={28} color={Colors.textTertiary} />
+                  <PawPrint size={32} color={Colors.terracotta} />
                   <Text style={styles.photoPlaceholderText}>Add Photo</Text>
                 </View>
               )}
             </Pressable>
-          </View>
+          </Animated.View>
 
           {/* Name */}
-          <Text style={styles.label}>Name *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Your pet's name"
-            placeholderTextColor={Colors.textTertiary}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-          />
+          <Animated.View entering={FadeInDown.duration(400).delay(200)}>
+            <Text style={styles.label}>Name *</Text>
+            <TextInput
+              style={inputStyle('name')}
+              placeholder="Your pet's name"
+              placeholderTextColor={Colors.textTertiary}
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              onFocus={() => setFocusedField('name')}
+              onBlur={() => setFocusedField(null)}
+            />
+          </Animated.View>
 
           {/* Species picker */}
-          <Text style={styles.label}>Species</Text>
-          <Pressable
-            style={styles.pickerBtn}
-            onPress={() => setShowSpeciesPicker(!showSpeciesPicker)}
-          >
-            <Text style={styles.pickerValue}>
-              {selectedSpecies.emoji} {selectedSpecies.label}
-            </Text>
-            <ChevronDown size={16} color={Colors.textTertiary} />
-          </Pressable>
+          <Animated.View entering={FadeInDown.duration(400).delay(300)}>
+            <Text style={styles.label}>Species</Text>
+            <Pressable
+              style={styles.pickerBtn}
+              onPress={() => setShowSpeciesPicker(!showSpeciesPicker)}
+            >
+              <Text style={styles.pickerValue}>
+                {selectedSpecies.emoji} {selectedSpecies.label}
+              </Text>
+              <ChevronDown size={16} color={Colors.textTertiary} />
+            </Pressable>
 
-          {showSpeciesPicker && (
-            <View style={styles.speciesGrid}>
-              {SPECIES_OPTIONS.map((opt) => {
-                const active = species === opt.value;
-                return (
-                  <Pressable
-                    key={opt.value}
-                    style={[styles.speciesOption, active && styles.speciesOptionActive]}
-                    onPress={() => {
-                      setSpecies(opt.value);
-                      setShowSpeciesPicker(false);
-                    }}
-                  >
-                    <Text style={styles.speciesEmoji}>{opt.emoji}</Text>
-                    <Text style={[styles.speciesLabel, active && { color: Colors.terracotta }]}>
-                      {opt.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
+            {showSpeciesPicker && (
+              <View style={styles.speciesGrid}>
+                {SPECIES_OPTIONS.map((opt, index) => {
+                  const active = species === opt.value;
+                  return (
+                    <Animated.View
+                      key={opt.value}
+                      entering={FadeInDown.duration(300).delay(index * 60)}
+                      style={{ flex: 1 }}
+                    >
+                      <Pressable
+                        style={[
+                          styles.speciesOption,
+                          active && styles.speciesOptionActive,
+                        ]}
+                        onPress={() => {
+                          setSpecies(opt.value);
+                          setShowSpeciesPicker(false);
+                        }}
+                      >
+                        <Text style={styles.speciesEmoji}>{opt.emoji}</Text>
+                        <Text style={[styles.speciesLabel, active && { color: Colors.terracotta }]}>
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    </Animated.View>
+                  );
+                })}
+              </View>
+            )}
+          </Animated.View>
 
           {/* Breed */}
-          <Text style={styles.label}>Breed</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. Golden Retriever"
-            placeholderTextColor={Colors.textTertiary}
-            value={breed}
-            onChangeText={setBreed}
-            autoCapitalize="words"
-          />
+          <Animated.View entering={FadeInDown.duration(400).delay(400)}>
+            <Text style={styles.label}>Breed</Text>
+            <TextInput
+              style={inputStyle('breed')}
+              placeholder="e.g. Golden Retriever"
+              placeholderTextColor={Colors.textTertiary}
+              value={breed}
+              onChangeText={setBreed}
+              autoCapitalize="words"
+              onFocus={() => setFocusedField('breed')}
+              onBlur={() => setFocusedField(null)}
+            />
+          </Animated.View>
 
           {/* Birth date + Weight */}
-          <View style={styles.row}>
+          <Animated.View entering={FadeInDown.duration(400).delay(500)} style={styles.row}>
             <View style={{ flex: 1 }}>
               <Text style={styles.label}>Birth Date</Text>
               <TextInput
-                style={styles.input}
+                style={inputStyle('birthDate')}
                 placeholder="YYYY-MM-DD"
                 placeholderTextColor={Colors.textTertiary}
                 value={birthDate}
                 onChangeText={setBirthDate}
                 keyboardType="numbers-and-punctuation"
+                onFocus={() => setFocusedField('birthDate')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.label}>Weight (lb)</Text>
               <TextInput
-                style={styles.input}
+                style={inputStyle('weightLb')}
                 placeholder="e.g. 55"
                 placeholderTextColor={Colors.textTertiary}
                 value={weightLb}
                 onChangeText={setWeightLb}
                 keyboardType="decimal-pad"
+                onFocus={() => setFocusedField('weightLb')}
+                onBlur={() => setFocusedField(null)}
               />
             </View>
-          </View>
+          </Animated.View>
 
           {/* Chip ID */}
-          <Text style={styles.label}>Microchip ID</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Optional chip number"
-            placeholderTextColor={Colors.textTertiary}
-            value={chipId}
-            onChangeText={setChipId}
-            autoCapitalize="characters"
-          />
+          <Animated.View entering={FadeInDown.duration(400).delay(600)}>
+            <Text style={styles.label}>Microchip ID</Text>
+            <TextInput
+              style={inputStyle('chipId')}
+              placeholder="Optional chip number"
+              placeholderTextColor={Colors.textTertiary}
+              value={chipId}
+              onChangeText={setChipId}
+              autoCapitalize="characters"
+              onFocus={() => setFocusedField('chipId')}
+              onBlur={() => setFocusedField(null)}
+            />
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -309,6 +350,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingBottom: 12,
     backgroundColor: Colors.warmWhite,
+    borderBottomLeftRadius: Radius.lg,
+    borderBottomRightRadius: Radius.lg,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 4,
+    zIndex: 10,
   },
   closeBtn: {
     width: 32,
@@ -322,25 +371,30 @@ const styles = StyleSheet.create({
   body: { flex: 1, paddingHorizontal: Spacing.lg },
 
   // Photo
-  photoSection: { alignItems: 'center', marginTop: Spacing.md, marginBottom: Spacing.lg },
+  photoSection: { alignItems: 'center', marginTop: Spacing.lg, marginBottom: Spacing.lg },
   photoPickerBtn: {
     width: 120,
     height: 120,
     borderRadius: 60,
     overflow: 'hidden',
     borderWidth: 3,
-    borderColor: Colors.border,
+    borderColor: Colors.terracotta,
     borderStyle: 'dashed',
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   photoPreview: { width: '100%', height: '100%' },
   photoPlaceholder: {
     flex: 1,
-    backgroundColor: Colors.sand,
+    backgroundColor: Colors.terracottaLight,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
   },
-  photoPlaceholderText: { fontSize: 12, fontWeight: '600', color: Colors.textTertiary },
+  photoPlaceholderText: { fontSize: 12, fontWeight: '600', color: Colors.terracotta },
 
   // Form
   label: {
@@ -359,6 +413,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
+  },
+  inputFocused: {
+    borderColor: Colors.terracotta,
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 2,
   },
   row: { flexDirection: 'row', gap: 10 },
 
@@ -381,7 +443,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   speciesOption: {
-    flex: 1,
     alignItems: 'center',
     gap: 4,
     paddingVertical: 14,
@@ -389,10 +450,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.border,
     backgroundColor: Colors.sand,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   speciesOptionActive: {
     borderColor: Colors.terracotta,
     backgroundColor: Colors.terracottaLight,
+    shadowColor: Colors.terracotta,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
   },
   speciesEmoji: { fontSize: 22 },
   speciesLabel: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary },
@@ -407,6 +477,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.terracotta,
     padding: 16,
     borderRadius: Radius.md,
+    shadowColor: Colors.terracotta,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 5,
   },
   saveBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },
 });

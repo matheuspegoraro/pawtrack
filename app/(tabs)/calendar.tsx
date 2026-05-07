@@ -1,7 +1,8 @@
 import { View, Text, ScrollView, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, HeartPulse, Bell } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, HeartPulse, Bell, Calendar } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
@@ -48,6 +49,11 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const isCurrentMonth = useMemo(
+    () => isSameMonth(currentMonth, new Date()),
+    [currentMonth]
+  );
 
   // Fetch health records and reminders for the visible month range
   const fetchEvents = useCallback(async () => {
@@ -158,84 +164,99 @@ export default function CalendarScreen() {
     [eventsByDay]
   );
 
+  const handleGoToToday = useCallback(() => {
+    setCurrentMonth(new Date());
+    setSelectedDate(new Date());
+  }, []);
+
   return (
     <View style={styles.root}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        {/* Header */}
+        {/* Header with month nav inside, rounded bottom */}
         <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
           <Text style={styles.title}>Calendar</Text>
-        </View>
 
-        {/* Month navigation */}
-        <View style={styles.monthNav}>
-          <Pressable
-            onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            style={styles.navBtn}
-          >
-            <ChevronLeft size={20} color={Colors.textPrimary} />
-          </Pressable>
-          <Text style={styles.monthLabel}>
-            {format(currentMonth, 'MMMM yyyy')}
-          </Text>
-          <Pressable
-            onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            style={styles.navBtn}
-          >
-            <ChevronRight size={20} color={Colors.textPrimary} />
-          </Pressable>
-        </View>
-
-        {/* Weekday headers */}
-        <View style={styles.weekdayRow}>
-          {WEEKDAYS.map((d) => (
-            <View key={d} style={styles.weekdayCell}>
-              <Text style={styles.weekdayText}>{d}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Calendar grid */}
-        <View style={styles.calendarGrid}>
-          {calendarDays.map((day, i) => {
-            const inMonth = isSameMonth(day, currentMonth);
-            const selected = isSameDay(day, selectedDate);
-            const today = isToday(day);
-            const dots = getDotsForDay(day);
-
-            return (
+          {/* Month navigation inside header */}
+          <View style={styles.monthNav}>
+            <Pressable
+              onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              style={styles.navBtn}
+            >
+              <ChevronLeft size={20} color={Colors.textPrimary} />
+            </Pressable>
+            <Text style={styles.monthLabel}>
+              {format(currentMonth, 'MMMM yyyy')}
+            </Text>
+            <View style={styles.monthNavRight}>
+              {!isCurrentMonth && (
+                <Pressable onPress={handleGoToToday} style={styles.todayPill}>
+                  <Text style={styles.todayPillText}>Today</Text>
+                </Pressable>
+              )}
               <Pressable
-                key={i}
-                style={[
-                  styles.dayCell,
-                  selected && styles.dayCellSelected,
-                ]}
-                onPress={() => setSelectedDate(day)}
+                onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                style={styles.navBtn}
               >
-                <Text
-                  style={[
-                    styles.dayText,
-                    !inMonth && styles.dayTextMuted,
-                    today && !selected && styles.dayTextToday,
-                    selected && styles.dayTextSelected,
-                  ]}
-                >
-                  {format(day, 'd')}
-                </Text>
-                <View style={styles.dotsRow}>
-                  {dots.map((color, di) => (
-                    <View
-                      key={di}
-                      style={[
-                        styles.dot,
-                        { backgroundColor: selected ? Colors.warmWhite : color },
-                      ]}
-                    />
-                  ))}
-                </View>
+                <ChevronRight size={20} color={Colors.textPrimary} />
               </Pressable>
-            );
-          })}
+            </View>
+          </View>
+        </View>
+
+        {/* Calendar card with weekday headers + grid */}
+        <View style={styles.calendarCard}>
+          {/* Weekday headers */}
+          <View style={styles.weekdayRow}>
+            {WEEKDAYS.map((d) => (
+              <View key={d} style={styles.weekdayCell}>
+                <Text style={styles.weekdayText}>{d}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Calendar grid */}
+          <View style={styles.calendarGrid}>
+            {calendarDays.map((day, i) => {
+              const inMonth = isSameMonth(day, currentMonth);
+              const selected = isSameDay(day, selectedDate);
+              const today = isToday(day);
+              const dots = getDotsForDay(day);
+
+              return (
+                <Pressable
+                  key={i}
+                  style={[
+                    styles.dayCell,
+                    selected && styles.dayCellSelected,
+                  ]}
+                  onPress={() => setSelectedDate(day)}
+                >
+                  <Text
+                    style={[
+                      styles.dayText,
+                      !inMonth && styles.dayTextMuted,
+                      today && !selected && styles.dayTextToday,
+                      selected && styles.dayTextSelected,
+                    ]}
+                  >
+                    {format(day, 'd')}
+                  </Text>
+                  <View style={styles.dotsRow}>
+                    {dots.map((color, di) => (
+                      <View
+                        key={di}
+                        style={[
+                          styles.dot,
+                          { backgroundColor: selected ? Colors.warmWhite : color },
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         {/* Selected day events */}
@@ -253,11 +274,21 @@ export default function CalendarScreen() {
               style={{ marginTop: Spacing.lg }}
             />
           ) : selectedEvents.length === 0 ? (
-            <View style={styles.noEvents}>
-              <Text style={styles.noEventsText}>No events this day</Text>
-            </View>
+            /* Rich empty state */
+            <Animated.View
+              entering={FadeInDown.duration(400).delay(100)}
+              style={styles.emptyCard}
+            >
+              <View style={styles.emptyIconCircle}>
+                <Calendar size={28} color={Colors.terracotta} strokeWidth={1.5} />
+              </View>
+              <Text style={styles.emptyTitle}>No events</Text>
+              <Text style={styles.emptyText}>
+                Nothing scheduled for this day. Health records and reminders will appear here.
+              </Text>
+            </Animated.View>
           ) : (
-            selectedEvents.map((event) => {
+            selectedEvents.map((event, index) => {
               const typeKey =
                 event.type === 'reminder'
                   ? 'reminder'
@@ -266,22 +297,27 @@ export default function CalendarScreen() {
               const Icon = config.icon;
 
               return (
-                <View key={event.id} style={styles.eventRow}>
-                  <View style={[styles.eventIcon, { backgroundColor: config.bg }]}>
-                    <Icon size={16} color={config.dot} />
+                <Animated.View
+                  key={event.id}
+                  entering={FadeInDown.duration(400).delay(index * 60)}
+                >
+                  <View style={styles.eventRow}>
+                    <View style={[styles.eventIcon, { backgroundColor: config.bg }]}>
+                      <Icon size={16} color={config.dot} />
+                    </View>
+                    <View style={styles.eventBody}>
+                      <Text style={styles.eventTitle}>{event.title}</Text>
+                      <Text style={styles.eventSub}>
+                        {event.petName
+                          ? `${event.petName} \u00B7 `
+                          : ''}
+                        {event.type === 'reminder' ? 'Reminder' : (event.recordType ?? '').replace('_', ' ')}
+                        {' \u00B7 '}
+                        {format(event.date, 'h:mm a')}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.eventBody}>
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventSub}>
-                      {event.petName
-                        ? `${event.petName} \u00B7 `
-                        : ''}
-                      {event.type === 'reminder' ? 'Reminder' : (event.recordType ?? '').replace('_', ' ')}
-                      {' \u00B7 '}
-                      {format(event.date, 'h:mm a')}
-                    </Text>
-                  </View>
-                </View>
+                </Animated.View>
               );
             })
           )}
@@ -293,25 +329,43 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.sand },
+
+  /* Header with rounded bottom corners, shadow, overlap */
   header: {
     backgroundColor: Colors.warmWhite,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 6,
+    marginBottom: -8,
+    zIndex: 10,
   },
   title: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary },
 
+  /* Month nav inside header */
   monthNav: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  monthNavRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   navBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.warmWhite,
+    backgroundColor: Colors.sand,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -320,10 +374,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.textPrimary,
   },
+  todayPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.terracottaLight,
+  },
+  todayPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.terracotta,
+  },
+
+  /* Calendar card */
+  calendarCard: {
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.md + 8,
+    backgroundColor: Colors.warmWhite,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xs,
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+  },
 
   weekdayRow: {
     flexDirection: 'row',
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
+    marginBottom: Spacing.xs,
   },
   weekdayCell: {
     flex: 1,
@@ -340,12 +421,12 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
   },
   dayCell: {
     width: '14.285%',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     gap: 3,
   },
   dayCellSelected: {
@@ -390,14 +471,44 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
-  noEvents: {
-    padding: Spacing.lg,
+
+  /* Rich empty state */
+  emptyCard: {
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 32,
+    paddingHorizontal: Spacing.xl,
+    backgroundColor: Colors.warmWhite,
+    borderRadius: Radius.lg,
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  noEventsText: {
-    fontSize: 14,
-    color: Colors.textTertiary,
+  emptyIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.terracottaLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
   },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+
+  /* Event rows with subtle shadow */
   eventRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -406,6 +517,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
     marginBottom: Spacing.sm,
+    shadowColor: Colors.textPrimary,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   eventIcon: {
     width: 36,

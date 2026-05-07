@@ -20,7 +20,9 @@ import {
   FileText,
   LogOut,
   ChevronRight,
+  PawPrint,
 } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { useAuthStore } from '@/stores/auth';
 import { usePremiumStore } from '@/stores/premium';
@@ -33,6 +35,7 @@ export default function SettingsScreen() {
 
   const [pushNotifications, setPushNotifications] = useState(true);
 
+  const isAnonymous = !user?.email;
   const userName =
     user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const userEmail = user?.email || '';
@@ -60,20 +63,40 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* User Info Card */}
-        <View style={styles.userCard}>
-          <View style={styles.userAvatar}>
-            <Text style={styles.userAvatarText}>
-              {userName.charAt(0).toUpperCase()}
-            </Text>
+        <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+          <View style={styles.userCard}>
+            <View style={styles.userAvatarWrapper}>
+              <View style={styles.userAvatar}>
+                <Text style={styles.userAvatarText}>
+                  {userName.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+              <View style={styles.avatarBadge}>
+                <PawPrint size={10} color={Colors.warmWhite} />
+              </View>
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>
+                {isAnonymous ? 'Anonymous User' : userName}
+              </Text>
+              {isAnonymous ? (
+                <Pressable onPress={() => router.push('/(auth)/signup')}>
+                  <Text style={styles.userPrompt}>
+                    Create an account for backup
+                  </Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.userEmail}>{userEmail}</Text>
+              )}
+            </View>
           </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{userName}</Text>
-            <Text style={styles.userEmail}>{userEmail}</Text>
-          </View>
-        </View>
+        </Animated.View>
 
         {/* Account Section */}
-        <View style={styles.section}>
+        <Animated.View
+          entering={FadeInDown.duration(500).delay(200)}
+          style={styles.section}
+        >
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.menuGroup}>
             <Pressable style={styles.menuItem}>
@@ -84,10 +107,13 @@ export default function SettingsScreen() {
               <ChevronRight size={18} color={Colors.textTertiary} />
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Notifications Section */}
-        <View style={styles.section}>
+        <Animated.View
+          entering={FadeInDown.duration(500).delay(300)}
+          style={styles.section}
+        >
           <Text style={styles.sectionTitle}>Notifications</Text>
           <View style={styles.menuGroup}>
             <View style={styles.menuItem}>
@@ -106,10 +132,13 @@ export default function SettingsScreen() {
               />
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Subscription Section */}
-        <View style={styles.section}>
+        <Animated.View
+          entering={FadeInDown.duration(500).delay(400)}
+          style={styles.section}
+        >
           <Text style={styles.sectionTitle}>Subscription</Text>
           <View style={styles.menuGroup}>
             <Pressable
@@ -145,10 +174,13 @@ export default function SettingsScreen() {
               <ChevronRight size={18} color={Colors.textTertiary} />
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Support Section */}
-        <View style={styles.section}>
+        <Animated.View
+          entering={FadeInDown.duration(500).delay(500)}
+          style={styles.section}
+        >
           <Text style={styles.sectionTitle}>Support</Text>
           <View style={styles.menuGroup}>
             <Pressable style={[styles.menuItem, styles.menuItemBorder]}>
@@ -175,16 +207,20 @@ export default function SettingsScreen() {
               <ChevronRight size={18} color={Colors.textTertiary} />
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Sign Out */}
-        <Pressable style={styles.signOutButton} onPress={handleSignOut}>
-          <LogOut size={18} color={Colors.coral} />
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </Pressable>
+        <Animated.View entering={FadeInDown.duration(500).delay(600)}>
+          <Pressable style={styles.signOutButton} onPress={handleSignOut}>
+            <LogOut size={18} color={Colors.coral} />
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </Pressable>
+        </Animated.View>
 
         {/* Version */}
-        <Text style={styles.versionText}>PawTrack v1.0.0</Text>
+        <Animated.View entering={FadeInDown.duration(500).delay(700)}>
+          <Text style={styles.versionText}>PawTrack v1.0.0</Text>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -198,7 +234,18 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.warmWhite,
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
+    paddingBottom: 32,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    position: 'relative',
+    overflow: 'hidden',
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 6,
+    marginBottom: -8,
+    zIndex: 10,
   },
   title: {
     fontSize: 24,
@@ -210,10 +257,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
     margin: Spacing.lg,
+    marginTop: Spacing.lg + 8,
     marginBottom: Spacing.sm,
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
     padding: Spacing.lg,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  userAvatarWrapper: {
+    position: 'relative',
   },
   userAvatar: {
     width: 52,
@@ -222,6 +278,21 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.terracottaLight,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.terracotta,
+  },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.terracotta,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.warmWhite,
   },
   userAvatarText: {
     fontSize: 22,
@@ -241,6 +312,12 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
+  userPrompt: {
+    fontSize: 13,
+    color: Colors.terracotta,
+    fontWeight: '500',
+    marginTop: 2,
+  },
   section: {
     paddingHorizontal: Spacing.lg,
     marginTop: Spacing.md,
@@ -258,6 +335,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
     overflow: 'hidden',
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   menuItem: {
     flexDirection: 'row',
@@ -320,6 +402,11 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     backgroundColor: Colors.warmWhite,
     borderRadius: Radius.md,
+    shadowColor: '#2A2017',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   signOutText: {
     fontSize: 16,
