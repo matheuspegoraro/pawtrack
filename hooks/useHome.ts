@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
+import { appEvents, DATA_CHANGED } from '@/lib/events';
 import { startOfDay, endOfDay, format } from 'date-fns';
 import type { Pet, HealthRecord, Reminder } from '@/types';
 
@@ -107,6 +108,8 @@ export function useHome() {
 
   useEffect(() => {
     fetchAll();
+    const unsub = appEvents.on(DATA_CHANGED, fetchAll);
+    return unsub;
   }, [fetchAll]);
 
   return { pets, todayTasks, overdue, upcoming, loading, refresh: fetchAll };

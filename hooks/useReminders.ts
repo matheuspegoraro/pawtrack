@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { appEvents, DATA_CHANGED } from '@/lib/events';
 import type { Reminder } from '@/types';
 
 export interface ReminderWithPet extends Reminder {
@@ -51,6 +52,8 @@ export function useReminders() {
 
   useEffect(() => {
     refresh();
+    const unsub = appEvents.on(DATA_CHANGED, refresh);
+    return unsub;
   }, [refresh]);
 
   const addReminder = useCallback(async (data: AddReminderData) => {

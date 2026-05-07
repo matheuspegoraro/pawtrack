@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '@/lib/supabase';
 import { scheduleLocalNotification } from '@/lib/notifications';
+import { appEvents, DATA_CHANGED } from '@/lib/events';
 import type { RecordType, Pet } from '@/types';
 
 const RECORD_TYPES: { type: RecordType; label: string; icon: typeof Syringe }[] = [
@@ -144,6 +145,7 @@ export default function AddRecordScreen() {
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      appEvents.emit(DATA_CHANGED);
       Alert.alert('Saved', 'Health record saved successfully.', [
         { text: 'OK', onPress: () => router.back() },
       ]);

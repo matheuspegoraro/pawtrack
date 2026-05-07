@@ -20,6 +20,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { X, Check, ChevronDown, PawPrint } from 'lucide-react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
+import { appEvents, DATA_CHANGED } from '@/lib/events';
 import { usePets } from '@/hooks/usePets';
 
 type Species = 'dog' | 'cat' | 'bird' | 'other';
@@ -150,6 +151,7 @@ export default function AddPetScreen() {
         await addPet(petData);
       }
 
+      appEvents.emit(DATA_CHANGED);
       router.back();
     } catch (err: any) {
       Alert.alert('Error', err.message ?? 'Something went wrong.');

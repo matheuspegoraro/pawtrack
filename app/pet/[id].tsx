@@ -242,8 +242,7 @@ export default function PetProfileScreen() {
         <Pressable
           style={styles.fabButton}
           onPress={() => {
-            // Navigate to add record for this pet
-            router.push(`/record/add?petId=${pet.id}`);
+            router.push('/(tabs)/add-record');
           }}
         >
           <Plus size={24} color={Colors.white} />
