@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#B5633B">
+  <!-- PawTrack Logo - Paw Print -->
+  <!-- Use this as the base for app icon generation -->
+
+  <!-- Top left toe -->
+  <ellipse cx="179" cy="112" rx="67" ry="77" transform="rotate(-12 179 112)"/>
+
+  <!-- Top right toe -->
+  <ellipse cx="333" cy="112" rx="67" ry="77" transform="rotate(12 333 112)"/>
+
+  <!-- Side left toe -->
+  <ellipse cx="102" cy="256" rx="56" ry="67" transform="rotate(-25 102 256)"/>
+
+  <!-- Side right toe -->
+  <ellipse cx="410" cy="256" rx="56" ry="67" transform="rotate(25 410 256)"/>
+
+  <!-- Main pad -->
+  <ellipse cx="256" cy="348" rx="123" ry="108"/>
+</svg>
