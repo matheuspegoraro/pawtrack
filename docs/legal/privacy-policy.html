@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PawTrack — Privacy Policy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Figtree', -apple-system, sans-serif;
+      background: #FEFBF8;
+      color: #2A2017;
+      line-height: 1.7;
+      padding: 0 0 60px;
+    }
+    .header {
+      background: #B5633B;
+      padding: 48px 24px 36px;
+      text-align: center;
+      position: relative;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0;
+      height: 20px;
+      background: #FEFBF8;
+      border-radius: 20px 20px 0 0;
+    }
+    .header h1 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+    }
+    .header p {
+      color: rgba(255,255,255,0.75);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px 0;
+    }
+    h2 {
+      font-family: 'Gabarito', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #2A2017;
+      margin: 32px 0 12px;
+    }
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 12px; font-size: 15px; color: #6B5D52; }
+    ul { padding-left: 20px; margin-bottom: 12px; }
+    li { font-size: 15px; color: #6B5D52; margin-bottom: 6px; }
+    strong { color: #2A2017; }
+    a { color: #B5633B; }
+    .effective { font-size: 13px; color: #9E9189; text-align: center; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Privacy Policy</h1>
+  <p>PawTrack: Pet Health Log</p>
+</div>
+
+<div class="container">
+
+<h2>1. Introduction</h2>
+<p>PawTrack: Pet Health Log ("PawTrack", "we", "us", or "our") is a mobile application developed by Matheus Pegoraro. This Privacy Policy explains how we collect, use, store, and protect your information when you use our app.</p>
+<p>By using PawTrack, you agree to the collection and use of information as described in this policy.</p>
+
+<h2>2. Information We Collect</h2>
+<p>We collect the following types of information:</p>
+
+<p><strong>Account Information (optional):</strong></p>
+<ul>
+  <li>Email address and full name — only if you choose to create an account</li>
+  <li>If you use the app without creating an account, an anonymous identifier is generated automatically</li>
+</ul>
+
+<p><strong>Pet Information (user-provided):</strong></p>
+<ul>
+  <li>Pet name, species, breed, birth date, weight, and microchip ID</li>
+  <li>Health records: vaccines, medications, vet visits, symptoms, and weight logs</li>
+  <li>Pet photos uploaded by you</li>
+</ul>
+
+<p><strong>Device Information (automatic):</strong></p>
+<ul>
+  <li>Push notification token — to send you health reminders</li>
+  <li>Device platform (iOS or Android)</li>
+</ul>
+
+<p><strong>Subscription Information:</strong></p>
+<ul>
+  <li>Subscription status (free or premium) — managed by RevenueCat</li>
+  <li>We do not collect or store payment details — all payments are processed by Apple App Store or Google Play Store</li>
+</ul>
+
+<h2>3. How We Use Your Information</h2>
+<ul>
+  <li>To provide and maintain the app's core features (health records, reminders)</li>
+  <li>To send push notifications about upcoming vaccines, medications, and vet appointments</li>
+  <li>To sync your data across devices when you create an account</li>
+  <li>To manage your premium subscription status</li>
+  <li>To generate PDF health reports when you request them</li>
+</ul>
+
+<h2>4. Data Storage and Security</h2>
+<p>Your data is stored securely using <strong>Supabase</strong>, a cloud database platform hosted on Amazon Web Services (AWS) infrastructure in the South America (São Paulo) region.</p>
+<p>We implement the following security measures:</p>
+<ul>
+  <li>Row Level Security (RLS) — your data is only accessible to your authenticated account</li>
+  <li>Encrypted connections (HTTPS/TLS) for all data transmission</li>
+  <li>Authentication tokens stored securely on your device using platform-native secure storage</li>
+</ul>
+
+<h2>5. Third-Party Services</h2>
+<p>PawTrack uses the following third-party services that may collect information:</p>
+<ul>
+  <li><strong>Supabase</strong> — database, authentication, and file storage. <a href="https://supabase.com/privacy" target="_blank">Privacy Policy</a></li>
+  <li><strong>RevenueCat</strong> — subscription management. <a href="https://www.revenuecat.com/privacy" target="_blank">Privacy Policy</a></li>
+  <li><strong>Expo</strong> — push notification delivery. <a href="https://expo.dev/privacy" target="_blank">Privacy Policy</a></li>
+  <li><strong>Apple App Store / Google Play Store</strong> — payment processing</li>
+</ul>
+<p>We do not sell, trade, or rent your personal information to any third party.</p>
+
+<h2>6. Data Sharing</h2>
+<p>We do not share your personal data with third parties except:</p>
+<ul>
+  <li>When you explicitly choose to share a pet's profile with family members or pet sitters using the Family Sharing feature</li>
+  <li>When you export and share a PDF health report</li>
+  <li>As required by law or to protect our legal rights</li>
+</ul>
+
+<h2>7. Your Rights</h2>
+<p>You have the right to:</p>
+<ul>
+  <li><strong>Access</strong> your data — all your data is visible within the app</li>
+  <li><strong>Export</strong> your data — use the PDF export feature</li>
+  <li><strong>Delete</strong> your account and all associated data — contact us at the email below</li>
+  <li><strong>Opt out</strong> of push notifications — toggle in Settings or via device settings</li>
+</ul>
+
+<h2>8. Children's Privacy</h2>
+<p>PawTrack is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child under 13 has provided us with personal information, please contact us and we will promptly delete it.</p>
+
+<h2>9. Data Retention</h2>
+<p>We retain your data for as long as your account is active. If you delete your account, all associated data (pet profiles, health records, reminders, photos) will be permanently deleted within 30 days.</p>
+<p>Anonymous accounts that have been inactive for more than 12 months may be automatically deleted.</p>
+
+<h2>10. Changes to This Policy</h2>
+<p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy within the app and updating the "Effective Date" below. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+<h2>11. Contact Us</h2>
+<p>If you have any questions about this Privacy Policy or wish to exercise your data rights, please contact us at:</p>
+<p><strong>Email:</strong> matheuspegoraro@gmail.com</p>
+<p><strong>Developer:</strong> Matheus Pegoraro</p>
+
+<p class="effective">Effective Date: May 8, 2026</p>
+
+</div>
+</body>
+</html>
