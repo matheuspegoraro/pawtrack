@@ -16,8 +16,10 @@ import {
   CircleCheckBig,
   ClipboardList,
   Plus,
+  FileText,
 } from 'lucide-react-native';
 import { Colors, Spacing, Radius } from '@/constants/theme';
+import { usePremiumStore } from '@/stores/premium';
 import { usePets } from '@/hooks/usePets';
 import { useRecords } from '@/hooks/useRecords';
 import { useState } from 'react';
@@ -72,6 +74,7 @@ export default function PetProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const isPremium = usePremiumStore((s) => s.isPremium);
   const { pets, loading: petsLoading } = usePets();
   const [filter, setFilter] = useState<FilterType>('all');
 
@@ -118,12 +121,23 @@ export default function PetProfileScreen() {
             <Pressable onPress={() => router.back()} style={styles.heroBtn}>
               <ChevronLeft size={20} color={Colors.white} />
             </Pressable>
-            <Pressable
-              onPress={() => router.push(`/pet/add?editId=${pet.id}`)}
-              style={styles.heroBtn}
-            >
-              <Ellipsis size={20} color={Colors.white} />
-            </Pressable>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Pressable
+                onPress={() => {
+                  if (!isPremium) { router.push('/premium'); return; }
+                  router.push(`/export/${pet.id}`);
+                }}
+                style={styles.heroBtn}
+              >
+                <FileText size={20} color={Colors.white} />
+              </Pressable>
+              <Pressable
+                onPress={() => router.push(`/pet/add?editId=${pet.id}`)}
+                style={styles.heroBtn}
+              >
+                <Ellipsis size={20} color={Colors.white} />
+              </Pressable>
+            </View>
           </View>
 
           {/* Pet info */}

@@ -31,6 +31,7 @@ import * as Haptics from 'expo-haptics';
 import { supabase } from '@/lib/supabase';
 import { scheduleLocalNotification } from '@/lib/notifications';
 import { appEvents, DATA_CHANGED } from '@/lib/events';
+import { usePremiumStore } from '@/stores/premium';
 import type { RecordType, Pet } from '@/types';
 
 const RECORD_TYPES: { type: RecordType; label: string; icon: typeof Syringe }[] = [
@@ -51,6 +52,7 @@ const FIELD_LABELS: Record<RecordType, string> = {
 export default function AddRecordScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isPremium = usePremiumStore((s) => s.isPremium);
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [selectedType, setSelectedType] = useState<RecordType>('vaccine');
@@ -318,14 +320,21 @@ export default function AddRecordScreen() {
                       style={[
                         styles.repeatChip,
                         repeatInterval === opt.value && styles.repeatChipActive,
+                        (!isPremium && opt.value !== '') && { opacity: 0.5 },
                       ]}
-                      onPress={() => setRepeatInterval(opt.value)}
+                      onPress={() => {
+                        if (!isPremium && opt.value !== '') {
+                          router.push('/premium');
+                          return;
+                        }
+                        setRepeatInterval(opt.value);
+                      }}
                     >
                       <Text style={[
                         styles.repeatChipText,
                         repeatInterval === opt.value && styles.repeatChipTextActive,
                       ]}>
-                        {opt.label}
+                        {opt.label}{!isPremium && opt.value !== '' ? ' 🔒' : ''}
                       </Text>
                     </Pressable>
                   ))}

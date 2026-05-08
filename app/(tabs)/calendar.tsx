@@ -4,6 +4,9 @@ import { StatusBar } from 'expo-status-bar';
 import { ChevronLeft, ChevronRight, Syringe, Pill, Stethoscope, HeartPulse, Bell, Calendar } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Colors, Spacing, Radius } from '@/constants/theme';
+import { usePremiumStore } from '@/stores/premium';
+import { useRouter } from 'expo-router';
+import { Crown } from 'lucide-react-native';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   format,
@@ -45,6 +48,8 @@ const TYPE_COLORS: Record<string, { dot: string; bg: string; icon: typeof Pill }
 
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
+  const isPremium = usePremiumStore((s) => s.isPremium);
+  const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -168,6 +173,32 @@ export default function CalendarScreen() {
     setCurrentMonth(new Date());
     setSelectedDate(new Date());
   }, []);
+
+  if (!isPremium) {
+    return (
+      <View style={styles.root}>
+        <StatusBar style="dark" />
+        <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
+          <Text style={styles.title}>Calendar</Text>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xl }}>
+          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.terracottaLight, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.md }}>
+            <Crown size={28} color={Colors.terracotta} />
+          </View>
+          <Text style={{ fontSize: 20, fontWeight: '800', color: Colors.textPrimary, marginBottom: 6, textAlign: 'center' }}>Health Calendar</Text>
+          <Text style={{ fontSize: 14, color: Colors.textSecondary, textAlign: 'center', lineHeight: 20, marginBottom: Spacing.lg }}>
+            See all your pet's events on a calendar with colored indicators. Upgrade to Pro to unlock.
+          </Text>
+          <Pressable
+            onPress={() => router.push('/premium')}
+            style={{ backgroundColor: Colors.terracotta, paddingHorizontal: 28, paddingVertical: 14, borderRadius: Radius.md }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: '700', color: 'white' }}>Unlock Pro</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>

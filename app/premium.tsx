@@ -16,8 +16,8 @@ import {
   Crown,
   FileText,
   Bell,
-  TrendingUp,
-  Users,
+  PawPrint,
+  Calendar,
 } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { Colors, Spacing, Radius } from '@/constants/theme';
@@ -26,32 +26,32 @@ import type { PurchasesPackage } from 'react-native-purchases';
 
 const FEATURES = [
   {
-    icon: FileText,
-    title: 'Export Reports',
-    description: 'Download & share PDF health reports with your vet',
+    icon: PawPrint,
+    title: 'Unlimited Pets',
+    description: 'Add all your furry friends — no limits on pet profiles',
     color: Colors.terracotta,
     bgColor: Colors.terracottaLight,
   },
   {
+    icon: FileText,
+    title: 'Export PDF Reports',
+    description: 'Download & share health records with your vet',
+    color: Colors.plum,
+    bgColor: Colors.plumLight,
+  },
+  {
     icon: Bell,
-    title: 'Smart Reminders',
-    description: 'Never miss a vaccine, medication, or appointment',
+    title: 'Recurring Reminders',
+    description: 'Auto-repeating alerts for monthly meds & annual vaccines',
     color: Colors.amber,
     bgColor: Colors.amberLight,
   },
   {
-    icon: TrendingUp,
-    title: 'Health Trends',
-    description: 'Track weight, symptoms, and wellness over time',
+    icon: Calendar,
+    title: 'Health Calendar',
+    description: 'See all events on a calendar with colored indicators',
     color: Colors.sage,
     bgColor: Colors.sageLight,
-  },
-  {
-    icon: Users,
-    title: 'Family Sharing',
-    description: 'Share pet profiles with family members & caregivers',
-    color: Colors.plum,
-    bgColor: Colors.plumLight,
   },
 ];
 

@@ -22,6 +22,7 @@ import { Colors, Spacing, Radius } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { appEvents, DATA_CHANGED } from '@/lib/events';
 import { usePets } from '@/hooks/usePets';
+import { usePremiumStore } from '@/stores/premium';
 
 type Species = 'dog' | 'cat' | 'bird' | 'other';
 
@@ -45,7 +46,11 @@ export default function AddPetScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ editId?: string }>();
   const { pets, addPet, updatePet } = usePets();
+  const isPremium = usePremiumStore((s) => s.isPremium);
   const isEditing = !!params.editId;
+
+  // Free users limited to 1 pet
+  const atPetLimit = !isPremium && !isEditing && pets.length >= 1;
 
   const [name, setName] = useState('');
   const [species, setSpecies] = useState<Species>('dog');
@@ -119,6 +124,10 @@ export default function AddPetScreen() {
   };
 
   const handleSave = async () => {
+    if (atPetLimit) {
+      router.push('/premium');
+      return;
+    }
     if (!name.trim()) {
       Alert.alert('Missing name', 'Please enter your pet\'s name.');
       return;
